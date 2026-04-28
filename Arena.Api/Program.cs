@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("https://arena-rpg-six.vercel.app") // Link do seu frontend no Vercel
+            policy.WithOrigins("https://arena-l6ucn9v3n-hccastro04-6092s-projects.vercel.app")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
