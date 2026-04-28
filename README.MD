@@ -71,17 +71,18 @@ O projeto segue rigorosamente os princípios de **Clean Code** e **SOLID**, gara
 └── Frontend
     ├── index.html (UI e Motor Gráfico)
     └── assets (Sprites e VFX)
+Plaintext
 
 ## 🚀 Como Executar
 
 ### Backend
 1. Navegue até a pasta da API:
-   ```bash
+
    cd ArenaProject/Arena.Api
 Execute o servidor .NET:
 
 Bash
-```bash
+
 dotnet run
 Bash
 
