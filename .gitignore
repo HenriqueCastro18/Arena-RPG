@@ -1,0 +1,11 @@
+# Pastas de build do .NET
+[Bb]in/
+[Oo]bj/
+
+# Pastas e arquivos do VS/VS Code
+.vs/
+.vscode/
+
+# Logs locais de treino da IA (Para não sujar o repositório)
+LogsDeTreino/
+*.json
