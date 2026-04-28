@@ -8,4 +8,4 @@
 
 # Logs locais de treino da IA (Para não sujar o repositório)
 LogsDeTreino/
-*.json
+*.jsongit init
