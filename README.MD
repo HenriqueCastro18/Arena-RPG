@@ -74,6 +74,7 @@ Este projeto foi construído seguindo rigorosamente os princípios **SOLID** e *
 ```bash
 cd ArenaProject/Arena.Api
 dotnet run
+```
 
 ### 2. Frontend
 Abra o arquivo `index.html` (Recomendado usar **Live Server**).
