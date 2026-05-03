@@ -3,9 +3,7 @@
 
 ### 🎮 Demonstração do Projeto
 
-<div align="center">
-  <video src="Arena.Web/assets/Preview%20RPG%20ARENA.mp4" width="100%" controls></video>
-</div>
+![Preview do Jogo](https://github.com/HenriqueCastro18/Arena-RPG/raw/main/Arena.Web/assets/Preview%20RPG%20ARENA.mp4)
 
 ---
 <br>
