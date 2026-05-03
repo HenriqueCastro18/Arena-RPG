@@ -10,49 +10,45 @@
 
 <br>
 
-> A **Arena RPG** é um motor de combate por turnos focado em estratégia avançada e inteligência artificial adaptativa. O projeto foi concebido para desafiar o jogador através de oponentes que aprendem com os seus hábitos, eventos climáticos que mudam as regras do jogo e um sistema de habilidades únicas (Ultimates) que exigem gestão rigorosa de recursos.
+<div align="center">
+  <img src="./image/banner_arena.png" alt="Arena RPG Gameplay" width="90%">
+  <p><i>Motor de combate por turnos com IA Preditiva e Arquitetura Escalável.</i></p>
+</div>
 
 ---
 
-## 🌟 Principais Funcionalidades
+## 🌟 Diferenciais Técnicos
 
-### 1. Inteligência Artificial Preditiva (Hardcore AI)
-Diferente de RPGs convencionais, os monstros não usam ataques aleatórios. O motor utiliza uma classe `PlayerPatternTracker` para monitorizar o comportamento do jogador:
-* **Leitura de Cura:** Se o jogador tende a curar-se quando tem pouca vida, o Boss entrará em postura defensiva para interceptar e roubar a poção.
-* **Mind Games:** O Boss pode guardar a sua Ultimate se perceber que o jogador usa o escudo de forma previsível, forçando o gasto de recursos à toa.
+### 1. Inteligência Artificial Preditiva (Hardcore AI) 🧠
+Diferente de RPGs convencionais, os monstros não utilizam ataques aleatórios. O motor utiliza a classe `PlayerPatternTracker` para monitorar o comportamento do usuário:
+*   **Leitura de Cura:** Se o jogador tende a curar-se com menos de 20% de HP, o Boss entra em postura defensiva para interceptar a ação.
+*   **Análise de Risco:** A IA decide poupar habilidades especiais (Ultimates) se prever que o jogador ativará um escudo, otimizando o gasto de mana.
 
-### 2. Sistema de Masmorra Dinâmica
-* **Progressão em Ondas:** Enfrenta 6 salas consecutivas, desde o Verme Gigante até ao Minotauro Tático.
-* **Evolução Cognitiva:** Os dados de treino acumulados nas primeiras salas são utilizados pelo Boss final para construir um perfil psicológico do jogador.
-
-### 3. Arena Viva (Eventos Aleatórios)
-A arena altera o estado do jogo a cada 2-5 turnos com eventos como:
-* ⚡ **Tempestade Magnética:** Estilhaça todos os escudos.
-* ☠️ **Gás Tóxico:** Impede qualquer tipo de cura por poções.
-* ✨ **Bênção de Mana:** Carregamento acelerado de Ultimates.
-
-### 4. Ultimates Criativas & Status
-Cada personagem possui mecânicas exclusivas que vão além do dano:
-* **Atordoamento (Stun):** Faz o inimigo perder o turno.
-* **Redução de HP Máximo:** Diminui permanentemente a resistência do alvo.
-* **Silenciamento:** Impede o uso de itens consumíveis.
+### 2. Arena Viva e Masmorras Dinâmicas ⛈️
+*   **Eventos Aleatórios:** A arena altera o estado do jogo a cada 2-5 turnos (ex: Tempestades que quebram escudos ou Gases Tóxicos que impedem a cura).
+*   **Evolução Cognitiva:** Dados acumulados em salas iniciais são utilizados pelo Boss final para construir um perfil tático contra o jogador.
 
 ---
 
-## 🛠️ Tecnologias e Arquitetura
+## 🛠️ Arquitetura e Engenharia de Software
 
-O projeto segue rigorosamente os princípios de **Clean Code** e **SOLID**, garantindo um Back-end robusto e escalável utilizando diversos Design Patterns:
+Este projeto foi construído seguindo rigorosamente os princípios **SOLID** e **Clean Code**, utilizando padrões de projeto para garantir desacoplamento:
 
-* **Strategy Pattern:** Utilizado para definir diferentes comportamentos de IA (`RuthlessAiStrategy`, `LearningBossAiStrategy`) e tipos de ataque.
-* **Factory Pattern:** Implementado na `CommandFactory` para instanciar comandos de combate dinamicamente.
-* **Command Pattern:** Desacopla a lógica de execução das ações (Atacar, Curar, Defender) do motor principal.
-* **Singleton/Static Tracker:** Gestão centralizada de estatísticas de treino para persistência durante a sessão.
+*   **Strategy Pattern:** Define comportamentos dinâmicos de IA (`RuthlessAiStrategy`, `LearningBossAiStrategy`).
+*   **Command Pattern:** Desacopla a execução das ações (Atacar, Curar, Defender) do motor principal através da `CommandFactory`.
+*   **Observer/Tracker:** Gestão centralizada de estatísticas de treino para persistência durante a sessão.
 
-### 💻 Stack Técnica
-* **Backend:** ASP.NET Core API (.NET 10) utilizando C#.
-* **Frontend:** Vanilla JavaScript com Sprite Engine customizado para renderização de frames em Canvas HTML5.
-* **UI/UX:** Design moderno baseado em Glassmorphism, responsivo para Mobile e Desktop (CSS3).
-* **Data:** Exportação de logs de treino em formato JSON para auditoria de comportamento da IA.
+### Fluxo de Decisão da IA
+
+
+---
+
+## 💻 Stack Técnica
+
+*   **Backend:** ASP.NET Core API (.NET 10) utilizando C#.
+*   **Frontend:** Vanilla JavaScript com Sprite Engine customizado em Canvas HTML5.
+*   **UI/UX:** Design moderno baseado em *Glassmorphism*, totalmente responsivo.
+*   **Data:** Exportação de logs de treino em formato JSON para auditoria de comportamento.
 
 ---
 
@@ -66,30 +62,34 @@ O projeto segue rigorosamente os princípios de **Clean Code** e **SOLID**, gara
 │   ├── Domain
 │   │   ├── Entities (Hero, Monster, AiDecision)
 │   │   └── Interfaces (IAiStrategy, IAttackStrategy)
-│   ├── LogsDeTreino (Ficheiros JSON gerados pela IA)
-│   └── Program.cs (Configuração da API e CORS)
+│   └── Program.cs (Configuração da API e Injeção de Dependência)
 └── Frontend
     ├── index.html (UI e Motor Gráfico)
-    └── assets (Sprites e VFX)
-Plaintext
+    └── assets (Sprites, SFX e VFX)
+```
 
 ## 🚀 Como Executar
 
-### Backend
-1. Navegue até a pasta da API:
-
-   cd ArenaProject/Arena.Api
-Execute o servidor .NET:
-
-Bash
-
+### 1. Backend
+```bash
+cd ArenaProject/Arena.Api
 dotnet run
-Bash
 
-Frontend
-Abra o ficheiro index.html no seu navegador.
+### 2. Frontend
+Abra o arquivo `index.html` (Recomendado usar **Live Server**).
 
-Recomendação: Utilize um servidor local como o Live Server do VS Code (certifique-se de adicionar a pasta LogsDeTreino ao ficheiro de ignore do Live Server para evitar reloads desnecessários quando a IA gerar um novo log).
+---
 
-👨‍💻 Desenvolvedor
-Henrique Castro Lead Software Engineer & Back-end Developer
+## 👨‍💻 Desenvolvedor
+
+**Henrique Castro**  
+*Engenharia de Software (7º Semestre) | Desenvolvedor Back-end*
+
+<div align="center">
+  <a href="https://github.com/HenriqueCastro18">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+  </a>
+  <a href="https://www.linkedin.com/in/henrique-castro-b13798345">
+    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+  </a>
+</div>
