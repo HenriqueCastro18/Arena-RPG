@@ -1,11 +1,10 @@
 # ⚔️ Arena RPG: Arena Viva
 
----
 
 ### 🎮 Demonstração do Projeto
 
 <div align="center">
-  <video src="Arena.Web/assets/Preview RPG ARENA.mp4" width="100%" controls></video>
+  <video src="Arena.Web/assets/Preview%20RPG%20ARENA.mp4" width="100%" controls></video>
 </div>
 
 ---
