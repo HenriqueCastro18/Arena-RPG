@@ -3,14 +3,8 @@
 
 ### 🎮 Demonstração do Projeto
 
-![Preview do Jogo](https://github.com/HenriqueCastro18/Arena-RPG/raw/main/Arena.Web/assets/Preview%20RPG%20ARENA.mp4)
-
----
-<br>
-
 <div align="center">
-  <img src="./image/banner_arena.png" alt="Arena RPG Gameplay" width="90%">
-  <p><i>Motor de combate por turnos com IA Preditiva e Arquitetura Escalável.</i></p>
+  <video src="Arena.Web/assets/Preview_RPG_ARENA.mp4" width="100%" controls></video>
 </div>
 
 ---
