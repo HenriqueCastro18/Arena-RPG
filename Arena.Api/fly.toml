@@ -1,5 +1,5 @@
 app = "arena-rpg-api"
-primary_region = "ewr"
+primary_region = "gru"
 
 [build]
   dockerfile = "Dockerfile"
