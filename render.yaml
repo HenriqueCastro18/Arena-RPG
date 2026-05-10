@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: arena-rpg-api
+    runtime: docker
+    dockerfilePath: Arena.Api/Dockerfile
+    dockerContext: Arena.Api
+    plan: free
+    envVars:
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CREDENTIALS
+        sync: false

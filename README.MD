@@ -292,49 +292,34 @@ Abre `Arena.Web/` no VS Code e clica em **Go Live**. O `config.js` já aponta pa
 ### Stack
 | Camada | Plataforma | Motivo |
 |---|---|---|
-| Frontend | **Vercel** | Static hosting gratuito |
-| API | **Fly.io** | Free tier com VM sempre ativa (sem cold start — crítico para sessões em memória) |
+| Frontend | **Vercel** | Static hosting gratuito, sem cartão |
+| API | **Render.com** | Free tier sem cartão, suporte a Docker |
 | Logs de IA | **Firebase Firestore** | Persistência dos dados de treino |
+
+> ⚠️ **Nota:** O free tier do Render dorme após 15 min de inatividade. A primeira requisição após idle demora ~30s para acordar. Sessões em memória são perdidas ao reiniciar — iniciar um novo jogo resolve.
 
 ---
 
-### API — Fly.io
+### API — Render.com
 
-#### Pré-requisitos
-```bash
-# Windows (PowerShell)
-winget install flyctl
-# ou
-powershell -c "iwr https://fly.io/install.ps1 -useb | iex"
-```
+1. Vai a **render.com** → cria conta com GitHub (sem cartão)
+2. **New → Blueprint** → conecta o repositório `Arena-RPG`
+3. O Render lê o `render.yaml` automaticamente e cria o serviço
+4. Após criar, vai ao serviço → **Environment** → adiciona:
 
-#### Deploy
+| Key | Value |
+|---|---|
+| `FIREBASE_PROJECT_ID` | O ID do teu projeto Firebase |
+| `FIREBASE_CREDENTIALS` | Conteúdo completo do `.json` da service account |
 
-```bash
-fly auth login
-
-cd Arena.Api
-
-# Cria o app no Fly.io (pede nome único — altere "arena-rpg-api" se necessário)
-fly launch --copy-config --no-deploy
-
-# Variáveis de ambiente (Firebase)
-fly secrets set FIREBASE_PROJECT_ID="seu-project-id"
-fly secrets set FIREBASE_CREDENTIALS='COLE_AQUI_O_CONTEUDO_COMPLETO_DO_JSON'
-
-# Deploy
-fly deploy
-```
-
-A URL da API aparece no final do output (`https://arena-rpg-api.fly.dev`).
-
-> **Onde ficam as variáveis:** Fly.io → Dashboard do app → **Secrets** (ou via `fly secrets list`)
+5. Clica em **Manual Deploy → Deploy latest commit**
+6. Copia a URL gerada (ex: `https://arena-rpg-api.onrender.com`)
 
 #### Após o deploy
-Abre `Arena.Web/config.js` e substitui a URL:
+Abre `Arena.Web/config.js` e substitui:
 ```js
 window.CONFIG = Object.freeze({
-    API_URL: "https://arena-rpg-api.fly.dev/api/game"
+    API_URL: "https://arena-rpg-api.onrender.com/api/game"
 });
 ```
 
