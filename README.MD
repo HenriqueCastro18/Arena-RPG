@@ -1,348 +1,255 @@
+<div align="center">
+
 # ⚔️ Arena RPG — Arena Viva
 
-### 🎮 Demonstração do Projeto
+<video src="https://github.com/user-attachments/assets/4c91ef8d-3e2f-48d1-abe8-603aeb33a1b5" width="100%" controls></video>
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/4c91ef8d-3e2f-48d1-abe8-603aeb33a1b5" width="100%" controls></video>
+<br/>
 
-  <br><br>
+> *Um motor de combate por turnos onde a IA não joga aleatoriamente — ela te estuda, aprende os teus padrões e usa-os contra ti.*
 
-  <img src="https://img.shields.io/badge/.NET_10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" />
-  <img src="https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white" />
-  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
-  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" />
-  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" />
-  <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" />
-  <img src="https://img.shields.io/badge/Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white" />
-  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" />
+<br/>
 
-  <br><br>
-
-  > Um motor de combate por turnos onde a inteligência artificial não joga aleatoriamente — ela te estuda, aprende os teus padrões e usa-os contra ti.
+![.NET](https://img.shields.io/badge/.NET_10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=black)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
 </div>
 
 ---
 
-## 📖 O que é este projeto?
+## 📖 Sobre o Projeto
 
-**Arena RPG** é um jogo de combate por turnos desenvolvido do zero com uma API em C# no backend e uma interface visual em HTML/CSS/JS no frontend. Não há biblioteca de game engine — o motor gráfico (sprites animados em Canvas), o sistema de combate e a IA foram todos implementados manualmente.
+**Arena RPG** é um jogo de combate por turnos construído do zero — sem game engines, sem bibliotecas de UI. O motor gráfico com sprites animados em Canvas, o sistema de combate e a IA foram todos implementados manualmente.
 
-O núcleo do projeto está na profundidade estratégica: cada ação gasta recursos específicos, cada monstro tem habilidades únicas, e o boss final adapta o seu comportamento com base no que o jogador fez nas salas anteriores.
-
----
-
-## 🎮 Como o Jogo Funciona
-
-### Estrutura de uma Partida
-
-O combate é por turnos alternados. Em cada turno, **o jogador escolhe uma ação** e a IA decide a ação do monstro simultaneamente. As ações de cada lado são executadas em ordem de prioridade (ações defensivas têm precedência sobre ataques). No final do turno, os efeitos são aplicados, os recursos são atualizados e o log de combate regista tudo.
-
-O jogo termina quando o HP de qualquer lado chega a 0. Não há revives — a única exceção é o **Último Suspiro** (ver abaixo).
+O diferencial está na profundidade estratégica: cada ação consome recursos limitados, cada monstro tem habilidades únicas, e o boss final **aprende o teu estilo de jogo** ao longo das batalhas e adapta o comportamento para te derrotar.
 
 ---
 
-## ⚙️ Sistema de Recursos
+## 🎮 Como Jogar
 
-Cada combatente (herói e monstros) gere um conjunto de recursos limitados. Gerir estes recursos corretamente **é a chave para vencer**.
+O combate é por turnos simultâneos. Tu escolhes uma ação, a IA decide a ação do monstro ao mesmo tempo. As ações defensivas têm prioridade sobre os ataques. O jogo termina quando o HP de qualquer lado chega a zero.
 
-### 🛡️ Escudo — 3 Cargas por Combate
+---
 
-Usar a ação **Defender** gasta sempre 1 carga de escudo, independentemente de o inimigo atacar ou não. Ao bloquear, o dano recebido é reduzido em **60%**. Um ataque Ultimate do inimigo gasta uma carga extra do escudo ao impactar.
+## ⚙️ Recursos de Combate
 
-Quando as 3 cargas se esgotam, o escudo entra em **cooldown de 3 turnos**, ficando completamente inutilizável. Ao restaurar, volta com as 3 cargas completas.
+<table>
+<tr>
+<td width="50%">
 
-| Situação | Custo |
-|---|---|
-| Usar Defender | −1 carga (sempre) |
-| Levar um Ultimate enquanto defende | −1 carga adicional |
-| Escudo com 0 cargas | Em recarregamento (3 turnos) |
+### 🛡️ Escudo — 3 Cargas
+Defende reduz **60% do dano**. Cada uso gasta 1 carga. Ultimates inimigas gastam uma carga extra ao impactar. Com 0 cargas, entra em cooldown de **3 turnos**.
 
-### ⚡ Ultimate — 2 Cargas (Herói) / 3 Cargas (Monstros)
+</td>
+<td width="50%">
 
-A Ultimate carrega **apenas quando o ataque acerta**. Se o inimigo esquivar, nenhuma carga é ganha. Usar a Ultimate consome toda a carga acumulada, independentemente de o ataque acertar ou errar.
+### ⚡ Ultimate — 2 Cargas (herói)
+Só carrega quando o ataque **acerta**. Esquivas do inimigo bloqueiam o carregamento. Cada herói e monstro tem um efeito único ao usar a Ultimate.
 
-Cada personagem tem uma Ultimate com efeito único (ver secção de personagens).
+</td>
+</tr>
+<tr>
+<td width="50%">
 
 ### 🧪 Poções — 3 por Combate
+Curam **40% do HP máximo efetivo**. Se o inimigo usar Defender enquanto bebes uma poção, ele **rouba-a** e cura-se no lugar.
 
-Curam **40% do HP máximo efetivo** (não do HP base — penalidades permanentes de HP máximo são respeitadas). A cura nunca excede o teto máximo atual.
-
-> **Mecânica de Roubo:** Se o jogador tenta curar enquanto o inimigo usa Defender, a poção é interceptada e **o inimigo bebe a poção roubada**, curando-se às tuas custas.
+</td>
+<td width="50%">
 
 ### 💨 Esquiva — 2 por Combate
+Cancela **100% do dano** e os efeitos secundários das Ultimates (maldições, roubo de escudo, roubo de poção). Monstros também esquivam.
 
-A Esquiva **cancela 100% do dano** do próximo ataque recebido, incluindo os efeitos secundários das Ultimates (escudo estilhaçado, roubo de poção, maldições). Ao esquecer uma esquiva, nenhuma carga de Ultimate é ganha pelo atacante.
+</td>
+</tr>
+</table>
 
-Os **monstros também usam esquiva** com as mesmas regras e limite de 2 por combate. A IA decide quando esquivar com base no estado do combate.
-
-### 🩸 Pacto Sombrio — 1 Uso por Combate
-
-Uma ação desesperada. Sacrifica permanentemente **40% do HP máximo** em troca de +1 carga de Ultimate e +1 carga de Escudo. O HP atual é ajustado se exceder o novo teto. Só pode ser usado uma vez por batalha.
-
----
-
-## 🧙 Personagens Jogáveis
-
-### Arthur — Guerreiro *(padrão)*
-- **Stats:** 1150 HP / 140 ATK
-- **Passiva:** Nenhuma especial — resistência pura.
-- **Ultimate:** Ataque pesado sem efeito secundário.
-
-### Maga Arcana — Mago
-- **Stats:** 1000 HP / 185 ATK
-- **Passiva — Escudo de Mana:** 20% de chance de anular completamente o dano de uma Ultimate inimiga.
-- **Ultimate — Explosão Arcana:** Reduz permanentemente o HP máximo do inimigo em **15%**.
-
-### Robin — Arqueiro
-- **Stats:** 1090 HP / 150 ATK
-- **Passiva:** Precisão — dano elevado base.
-- **Ultimate — Chuva de Flechas:** **Atordoa** o inimigo, forçando-o a perder o próximo turno.
-
-### Rei Soberano — Rei
-- **Stats:** 1200 HP / 130 ATK
-- **Passiva:** — Nenhuma
-- **Ultimate — Golpe de Estado:** Cura **15% do HP máximo efetivo** e restaura o Escudo para 3/3, desde que acerte em cheio.
+### 🩸 Pacto Sombrio — 1 Uso por Batalha
+Sacrifica permanentemente **40% do HP máximo** em troca de +1 carga de Ultimate e +1 carga de Escudo. Ação de desespero — usares quando a situação é crítica.
 
 ---
 
-## 👾 Monstros e Chefe
+## 🧙 Heróis
 
-### Monstros Comuns
+| Herói | HP | ATK | Ultimate |
+|---|---|---|---|
+| ⚔️ **Arthur** — Guerreiro | 1150 | 140 | Ataque pesado sem efeito secundário |
+| 🔮 **Maga Arcana** — Mago | 1000 | 185 | **Explosão Arcana** — Reduz o HP máximo do inimigo em 15% permanentemente |
+| 🏹 **Robin** — Arqueiro | 1090 | 150 | **Chuva de Flechas** — Atordoa o inimigo, fazendo-o perder o próximo turno |
+| 👑 **Rei Soberano** — Rei | 1200 | 130 | **Golpe de Estado** — Cura 15% do HP máximo e restaura o Escudo para 3/3 |
 
-| Monstro | HP | ATK | Elemento | Ultimate |
-|---|---|---|---|---|
-| Orc Selvagem | 540 | 148 | Terra | — |
-| Caçadora Escura | 520 | 170 | Trevas | **Tiro Sombrio** — Estilhaça completamente o escudo do herói (esquivável) |
-| Mago Sombrio | 570 | 168 | Trevas | **Drenagem Vital** — Cura o Mago em 20% do seu HP máximo |
-| Verme Gigante | 680 | 145 | Terra | **Terremoto Devorador** — Remove 1 poção do inventário do herói (esquivável) |
-| Minotauro Guerreiro | 750 | 165 | Físico | **Golpe Fendido** — Reduz permanentemente o HP máximo do herói em 15% |
-| Minotauro Xamã | 820 | 178 | Mágico | **Maldição Espiritual** — Impede o uso de poções por 2 turnos |
+---
 
-### Minotauro Chefe — Boss Adaptativo
+## 👾 Inimigos
 
-- **Stats base:** 1450 HP / 130 ATK
-- **Ultimate — Pacto Sombrio:** Drena **35% do HP máximo efetivo** permanentemente e consome toda a carga de Ultimate do herói. Bloqueável com Escudo ou Esquiva.
+| Monstro | HP | ATK | Ultimate |
+|---|---|---|---|
+| 🐗 Orc Selvagem | 540 | 148 | — |
+| 🏹 Caçadora Escura | 520 | 170 | **Tiro Sombrio** — Estilhaça completamente o escudo do herói |
+| 🧙 Mago Sombrio | 570 | 168 | **Drenagem Vital** — Cura-se em 20% do seu HP máximo |
+| 🪱 Verme Gigante | 680 | 145 | **Terremoto Devorador** — Remove 1 poção do herói |
+| 🪓 Minotauro Guerreiro | 750 | 165 | **Golpe Fendido** — Reduz o HP máximo do herói em 15% permanentemente |
+| 🔮 Minotauro Xamã | 820 | 178 | **Maldição Espiritual** — Impede o uso de poções por 2 turnos |
 
-O Boss tem **4 variantes**, determinadas pelo comportamento histórico do jogador:
+### 🐂 Minotauro Chefe — Boss Adaptativo
 
-| Estilo do Jogador | Variante | Modificação |
+**Stats base:** 1450 HP / 130 ATK · Começa com 1 carga de Ultimate e 3 poções.
+
+**Ultimate — Pacto Sombrio:** Drena **35% do HP máximo** permanentemente e consome toda a carga de Ultimate do herói. Bloqueável com Escudo ou Esquiva.
+
+O Boss surge em **4 variantes** determinadas pelo teu histórico de batalha:
+
+| Variante | Condição | Bónus |
 |---|---|---|
-| Sem histórico | **Sorteado aleatoriamente** | Qualquer das 4 variantes |
-| Agressivo (muitos ataques) | **Minotauro Tático** | +200 HP, +30 ATK |
-| Defensivo (usa muito escudo) | **Minotauro Quebra-Guarda** | +50 ATK (especializado em quebrar escudos) |
-| Equilibrado | **Minotauro Implacável** | +150 HP, +35 ATK |
-
-O Boss começa o combate com **1 carga de Ultimate** e **3 poções**, possuindo a IA mais avançada do jogo.
+| 🐂 Minotauro Chefe | Sem histórico (sorteado) | — |
+| ⚔️ Minotauro Tático | Jogador agressivo | +200 HP / +30 ATK |
+| 💥 Minotauro Quebra-Guarda | Jogador defensivo | +50 ATK especializado em escudos |
+| ⚖️ Minotauro Implacável | Jogador equilibrado | +150 HP / +35 ATK |
 
 ---
 
-## 🧠 Sistema de Inteligência Artificial
+## 🧠 Inteligência Artificial
 
-### IA Geral — `RuthlessAiStrategy`
+### Monstros Comuns — `RuthlessAiStrategy`
+Decide em tempo real com base no estado do combate: interceptar poções, esquivar de Ultimates, curar em HP crítico ou atacar.
 
-Utilizada pelos monstros comuns. Toma decisões baseadas no estado atual do combate:
+### Boss — `LearningBossAiStrategy`
 
-1. **Usar Ultimate** se carregada (com análise de contexto)
-2. **Esquivar** se o herói tem Ultimate pronta (40% de chance)
-3. **Interceptar poção** se o herói tem pouca vida e ainda tem poções
-4. **Curar** se o próprio HP está abaixo de 45% e tem poções
-5. **Defender** preventivamente se o herói tem Ultimate pronta
-6. **Atacar** como ação padrão
+Opera em 3 fases à medida que perde HP:
 
-### IA do Boss — `LearningBossAiStrategy`
+| Fase | HP do Boss | Comportamento |
+|---|---|---|
+| **1 — Aprendizagem** | > 65% | Metódico, conservador, observa o jogador |
+| **2 — Adaptação** | 35–65% | Usa os dados do `PlayerPatternTracker` para prever e contra-atacar |
+| **3 — Enraivecido** | < 35% | Caótico e perigoso — bloqueia Ultimates com 85% de chance |
 
-Opera em **3 fases** conforme o HP do Boss decresce:
+### `PlayerPatternTracker` — O Cérebro
 
-**Fase 1 (HP > 65%)** — *Aprendizagem*
-O Boss é metódico e conservador. Cura com antecedência (HP < 55%) e observa o jogador.
+Regista o teu comportamento durante toda a sessão e usa-o para alimentar a IA do Boss:
 
-**Fase 2 (35–65% HP)** — *Adaptação*
-O Boss começa a usar os dados do `PlayerPatternTracker` contra o jogador:
-- Se o jogador é agressivo → aumenta a frequência de bloqueios
-- Se o jogador tende a defender quando a Ultimate está pronta → guarda a Ultimate
-- Prediz a próxima ação com base em sequências históricas
+- **Frequência de cura com HP baixo** → Boss decide interceptar poções
+- **Frequência de defesa com Ultimate do Boss pronta** → Boss decide guardar ou lançar
+- **Score de agressividade** → Boss calibra bloqueios
+- **Sequências de ações** → Boss prediz a tua próxima jogada
 
-**Fase 3 (HP < 35%)** — *Enraivecido*
-O Boss torna-se caótico mas perigoso: alta prioridade para bloquear Ultimates (85%), curas de emergência e esquivas inteligentes.
-
-### `PlayerPatternTracker` — O Cérebro da IA
-
-| Dado Rastreado | Como é Usado |
-|---|---|
-| Frequência de cura com HP baixo | Boss decide interceptar poções |
-| Frequência de defesa quando Boss tem Ultimate | Boss decide guardar ou lançar a Ultimate |
-| Score de agressividade | Boss calibra a frequência de bloqueios |
-| Sequências de ações (ex: defender→atacar) | Boss prediz e antecipa a próxima ação |
-
-No final de cada batalha, todos estes dados são enviados para o **Firebase Firestore** para persistência e análise futura.
+Os dados de treino são guardados automaticamente no **Firebase Firestore** ao final de cada batalha.
 
 ---
 
 ## 🌍 Arena Viva — Eventos Aleatórios
 
-A cada 2–5 turnos, a arena altera as regras do jogo com um evento.
+A cada 2–5 turnos, a arena altera as regras com um evento:
 
-| Evento | Tipo | Efeito |
+| Evento | Duração | Efeito |
 |---|---|---|
-| ☠️ Gás Tóxico | 2 turnos | Poções são completamente ineficazes para ambos |
-| ⚡ Tempestade Magnética | Instantâneo | Destrói todos os escudos (herói + monstro) |
-| ✨ Bênção de Mana | 2 turnos | Ataques carregam +2 de Ultimate em vez de +1 |
-| 🩸 Frenesi de Batalha | 2 turnos | +50% de dano em todos os ataques físicos |
-| 🍃 Ventos Curativos | 2 turnos | Ambos os lados recuperam 10% do HP máximo por turno |
-| 🌌 Vazio de Mana | Instantâneo | Reseta a carga de Ultimate de ambos os lados para 0 |
-| 🎁 Suprimentos | Instantâneo | Ambos recebem +1 poção |
-| 🛡️ Égide Divina | Instantâneo | Restaura os escudos de ambos (3/3, cooldown zerado) |
+| ☠️ Gás Tóxico | 2 turnos | Poções ineficazes para ambos |
+| ⚡ Tempestade Magnética | Instantâneo | Destrói todos os escudos |
+| ✨ Bênção de Mana | 2 turnos | Ataques carregam +2 de Ultimate |
+| 🩸 Frenesi de Batalha | 2 turnos | +50% de dano físico |
+| 🍃 Ventos Curativos | 2 turnos | Ambos recuperam 10% do HP por turno |
+| 🌌 Vazio de Mana | Instantâneo | Reseta a Ultimate de ambos para 0 |
+| 🎁 Suprimentos | Instantâneo | +1 poção para cada lado |
+| 🛡️ Égide Divina | Instantâneo | Restaura os escudos de ambos (3/3) |
 
 ---
 
-## 🌪️ Último Suspiro — Second Wind
+## 🌪️ Último Suspiro
 
-Quando qualquer combatente cai abaixo de **20% do HP máximo efetivo**, o **Último Suspiro** é ativado automaticamente (uma vez por combate):
-
-- Cura **25% do HP máximo efetivo** instantaneamente
-- Ganha carga de Ultimate extra a cada turno enquanto ativo
-- O HP máximo diminui 5% por turno (o transe tem custo)
+Quando qualquer combatente cai abaixo de **20% do HP máximo**, ativa automaticamente (uma vez por combate): cura **25% do HP** e ganha carga de Ultimate extra por turno — mas o HP máximo diminui 5% a cada turno enquanto ativo.
 
 ---
 
 ## 🏰 Modo Masmorra
 
-Enfrenta 6 salas consecutivas em ordem crescente de dificuldade:
+6 salas consecutivas sem restaurar HP entre elas. O Boss da Sala 6 já tem o teu perfil psicológico completo.
 
 ```
-Sala 1 → Verme Gigante
-Sala 2 → Mago Sombrio
-Sala 3 → Caçadora Escura
-Sala 4 → Minotauro Guerreiro
-Sala 5 → Minotauro Xamã
-Sala 6 → Minotauro Chefe (Boss Adaptativo)
+Sala 1 → Verme Gigante       Sala 4 → Minotauro Guerreiro
+Sala 2 → Mago Sombrio        Sala 5 → Minotauro Xamã
+Sala 3 → Caçadora Escura     Sala 6 → Minotauro Chefe (Boss Adaptativo)
 ```
-
-O HP do herói **não é restaurado entre salas**. O Boss da Sala 6 já terá o perfil psicológico completo do jogador, construído ao longo de todas as salas anteriores.
 
 ---
 
-## 🛠️ Arquitetura e Design Patterns
+## 🛠️ Arquitetura
 
-O backend foi construído aplicando princípios **SOLID** e os seguintes padrões de design:
+Construído com princípios **SOLID** e os seguintes padrões de design:
 
-### Command Pattern
-Cada ação de combate (`AttackCommand`, `DefendCommand`, `HealCommand`, `DodgeCommand`) implementa `ICombatCommand`. O `CommandFactory` instancia o comando correto em runtime. Isso desacopla a lógica de execução do motor de combate.
-
-### Strategy Pattern
-`PhysicalAttack` e `UltimateAttack` implementam `IAttackStrategy`. `RuthlessAiStrategy` e `LearningBossAiStrategy` implementam `IAiStrategy`. O `GameSession` invoca a estratégia correta sem conhecer os detalhes de implementação.
-
-### Factory Pattern
-`CharacterFactory` cria heróis e monstros. `CommandFactory` instancia comandos de combate. Ambos centralizam a criação de objetos.
-
-### Dependency Injection
-`ITrainingLogService` é injetado no controller. Em produção usa `FirestoreTrainingLogService`; localmente usa `NullTrainingLogService` (no-op). Nenhuma dependência hardcoded.
+| Padrão | Onde é Usado |
+|---|---|
+| **Command** | `AttackCommand`, `DefendCommand`, `HealCommand`, `DodgeCommand` via `CommandFactory` |
+| **Strategy** | `PhysicalAttack`, `UltimateAttack`, `RuthlessAiStrategy`, `LearningBossAiStrategy` |
+| **Factory** | `CharacterFactory` (heróis e monstros), `CommandFactory` (ações) |
+| **Dependency Injection** | `ITrainingLogService` — `FirestoreTrainingLogService` em produção, `NullTrainingLogService` local |
 
 ```
 Arena.Api/
 ├── Application/
-│   ├── Commands/          → Ações de combate (Command Pattern)
-│   ├── Services/          → GameSession (motor) + GameManager (sessões)
-│   └── Strategies/Ai/     → RuthlessAiStrategy + LearningBossAiStrategy
+│   ├── Commands/          → Command Pattern (ações de combate)
+│   ├── Services/          → GameSession (motor) · GameManager (sessões)
+│   └── Strategies/Ai/     → RuthlessAiStrategy · LearningBossAiStrategy
 ├── Domain/
-│   ├── Entities/          → Hero, Monster, Character, TrainingReport
+│   ├── Entities/          → Hero · Monster · TrainingReport
 │   ├── Factories/         → CharacterFactory
-│   ├── Interfaces/        → IAttackStrategy, IAiStrategy, ITrainingLogService
-│   └── Strategies/        → PhysicalAttack, UltimateAttack
+│   ├── Interfaces/        → IAttackStrategy · IAiStrategy · ITrainingLogService
+│   └── Strategies/        → PhysicalAttack · UltimateAttack
 ├── Infrastructure/
-│   └── Firebase/          → FirestoreTrainingLogService + NullTrainingLogService
-└── Controllers/           → GameController (endpoints REST)
+│   └── Firebase/          → FirestoreTrainingLogService · NullTrainingLogService
+└── Controllers/           → GameController (REST API)
 ```
 
 ---
 
-## 🚀 Como Executar (Local)
+## ☁️ Infraestrutura de Produção
 
-### Pré-requisitos
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- VS Code com extensão **Live Server**
+| Camada | Plataforma | Função |
+|---|---|---|
+| 🌐 **Frontend** | [Vercel](https://vercel.com) | Hospedagem estática — deploy automático via GitHub |
+| ⚙️ **API** | [Render](https://render.com) | Backend .NET 10 via Docker — free tier sem cartão |
+| 🔥 **Dados de Treino** | [Firebase Firestore](https://firebase.google.com) | Persistência dos logs de IA por batalha |
 
-### 1. Backend — API
+---
+
+## 🚀 Executar Localmente
+
+**Pré-requisitos:** .NET 10 SDK · VS Code + Live Server
 
 ```bash
+# 1. API
 cd Arena.Api
 dotnet run
+# Servidor em http://localhost:8080
+
+# 2. Frontend
+# Abre Arena.Web/ no VS Code → Go Live
 ```
 
-O servidor inicia em `http://localhost:8080`.
+### Endpoints
 
-### 2. Frontend — Interface
-
-Abre `Arena.Web/` no VS Code e clica em **Go Live**. O `config.js` já aponta para localhost por defeito no desenvolvimento.
-
-### Endpoints da API
-
-| Método | Endpoint | Descrição |
+| Método | Rota | Descrição |
 |---|---|---|
-| `POST` | `/api/game/start` | Inicia uma nova sessão de combate |
-| `POST` | `/api/game/{id}/attack` | Executa uma ação do jogador |
+| `POST` | `/api/game/start` | Inicia nova sessão de combate |
+| `POST` | `/api/game/{id}/attack` | Executa ação do jogador |
 | `POST` | `/api/game/{id}/bloodpact` | Ativa o Pacto Sombrio |
 | `POST` | `/api/game/simulate` | Simula 100 batalhas (balanceamento) |
 
 ---
 
-## ☁️ Deploy em Produção
-
-### Stack
-| Camada | Plataforma | Motivo |
-|---|---|---|
-| Frontend | **Vercel** | Static hosting gratuito, sem cartão |
-| API | **Render.com** | Free tier sem cartão, suporte a Docker |
-| Logs de IA | **Firebase Firestore** | Persistência dos dados de treino |
-
-> ⚠️ **Nota:** O free tier do Render dorme após 15 min de inatividade. A primeira requisição após idle demora ~30s para acordar. Sessões em memória são perdidas ao reiniciar — iniciar um novo jogo resolve.
-
----
-
-### API — Render.com
-
-1. Vai a **render.com** → cria conta com GitHub (sem cartão)
-2. **New → Blueprint** → conecta o repositório `Arena-RPG`
-3. O Render lê o `render.yaml` automaticamente e cria o serviço
-4. Após criar, vai ao serviço → **Environment** → adiciona:
-
-| Key | Value |
-|---|---|
-| `FIREBASE_PROJECT_ID` | O ID do teu projeto Firebase |
-| `FIREBASE_CREDENTIALS` | Conteúdo completo do `.json` da service account |
-
-5. Clica em **Manual Deploy → Deploy latest commit**
-6. Copia a URL gerada (ex: `https://arena-rpg-api.onrender.com`)
-
-#### Após o deploy
-Abre `Arena.Web/config.js` e substitui:
-```js
-window.CONFIG = Object.freeze({
-    API_URL: "https://arena-rpg-api.onrender.com/api/game"
-});
-```
-
----
-
-### Frontend — Vercel
-
-1. Vercel Dashboard → **New Project** → importa `Arena-RPG`
-2. **Root Directory** → `ArenaProject`
-3. Deploy — o `vercel.json` configura tudo automaticamente
-
----
-
 ## 👨‍💻 Desenvolvedor
 
-**Henrique Castro**  
-Backend Developer — C# / .NET
-
 <div align="center">
-  <a href="https://github.com/HenriqueCastro18">
-    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
-  </a>
-  <a href="https://www.linkedin.com/in/henrique-castro-b13798345">
-    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
-  </a>
+
+**Henrique Castro**
+Backend Developer — C# · .NET · Software Engineering
+
+<br/>
+
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HenriqueCastro18)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/henrique-castro-b13798345)
+
 </div>
