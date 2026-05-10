@@ -6,7 +6,7 @@ using Arena.Api.Domain.Entities;
 using Arena.Api.Domain.Interfaces;
 using Arena.Api.Domain.Strategies;
 using Arena.Api.Domain.Factories;
-using Arena.Api.Domain.Services; 
+using Arena.Api.Domain.Services;
 
 namespace Arena.Api.Controllers
 {
@@ -15,10 +15,12 @@ namespace Arena.Api.Controllers
     public class GameController : ControllerBase
     {
         private readonly GameManager _gameManager;
+        private readonly ITrainingLogService _trainingLog;
 
-        public GameController(GameManager gameManager)
+        public GameController(GameManager gameManager, ITrainingLogService trainingLog)
         {
             _gameManager = gameManager;
+            _trainingLog = trainingLog;
         }
 
         [HttpPost("start")]
@@ -45,6 +47,8 @@ namespace Arena.Api.Controllers
                 CurrentArenaEvent = session.CurrentArenaEvent,
                 EventDuration = session.EventDuration,
                 Log = session.CombatLog,
+                HeroDodgesLeft = session.HeroDodgesLeft,
+                HeroBloodPactUsed = session.HeroBloodPactUsed,
                 HeroInSecondWind = false,
                 MonsterInSecondWind = false
             });
@@ -64,12 +68,15 @@ namespace Arena.Api.Controllers
                 session.HeroShieldDurability
             );
 
-            if (request.AttackType == "Heal" || request.AttackType == "Defend")
-                session.PlayRound(request.AttackType); 
+            if (request.AttackType == "Heal" || request.AttackType == "Defend" || request.AttackType == "Dodge")
+                session.PlayRound(request.AttackType);
             else
                 session.PlayRound("Attack", request.AttackType == "Ultimate" ? new UltimateAttack() : new PhysicalAttack());
 
-            return Ok(new { 
+            if (session.IsGameOver)
+                _ = _trainingLog.SaveAsync(session.BuildTrainingReport());
+
+            return Ok(new {
                 IsGameOver = session.IsGameOver,
                 HeroHp = session.Player.CurrentHp,
                 MonsterHp = session.Enemy.CurrentHp,
@@ -90,14 +97,39 @@ namespace Arena.Api.Controllers
                 HeroUltCharge = session.HeroUltCharge,
                 HeroShieldDurability = session.HeroShieldDurability,
                 HeroShieldCooldown = session.HeroShieldCooldown,
+                MonsterShieldDurability = session.MonsterShieldDurability,
                 MonsterShieldCooldown = session.MonsterShieldCooldown,
+                MonsterDodgesLeft = session.MonsterDodgesLeft,
                 HeroInSecondWind = session.HeroInSecondWind,
                 MonsterInSecondWind = session.MonsterInSecondWind,
                 MonsterAction = session.LastMonsterAttackType ?? acaoDaIa,
                 MonsterActedFirst = session.MonsterActedFirst,
-                TriggeredEventThisRound = session.CurrentArenaEvent,
+                TriggeredEventThisRound = session.TriggeredEventThisRound,
                 CurrentArenaEvent = session.CurrentArenaEvent,
                 EventDuration = session.EventDuration,
+                HeroDodgesLeft = session.HeroDodgesLeft,
+                HeroBloodPactUsed = session.HeroBloodPactUsed,
+                Log = session.CombatLog
+            });
+        }
+
+        [HttpPost("{sessionId}/bloodpact")]
+        public IActionResult BloodPact(Guid sessionId)
+        {
+            var session = _gameManager.GetSession(sessionId);
+            if (session == null) return NotFound("Partida não encontrada.");
+
+            session.ApplyBloodPact();
+
+            return Ok(new {
+                HeroHp = session.Player.CurrentHp,
+                HeroMaxHp = session.CurrentHeroMaxHp,
+                HeroUltCharge = session.HeroUltCharge,
+                HeroShieldDurability = session.HeroShieldDurability,
+                HeroShieldCooldown = session.HeroShieldCooldown,
+                HeroBloodPactUsed = session.HeroBloodPactUsed,
+                HeroInSecondWind = session.HeroInSecondWind,
+                MonsterInSecondWind = session.MonsterInSecondWind,
                 Log = session.CombatLog
             });
         }

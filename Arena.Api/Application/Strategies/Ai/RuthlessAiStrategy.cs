@@ -12,71 +12,71 @@ namespace Arena.Api.Application.Strategies.Ai
 
         public Arena.Api.Domain.Entities.AiDecision DecideNextMove(GameSession session)
         {
-            bool canHeal = session.CurrentArenaEvent != "ToxicGas";
+            bool canHeal = session.CurrentArenaEvent != "ToxicGas" && session.MonsterPotions > 0;
             bool canDefend = session.CurrentArenaEvent != "MagneticStorm" && session.MonsterShieldCooldown == 0 && session.MonsterShieldDurability > 0;
+            bool canDodge = session.MonsterDodgesLeft > 0;
             bool heroIsShielding = session.HeroShieldDurability > 0 && session.HeroShieldCooldown == 0;
+            bool heroUltReady = session.HeroUltCharge >= 2;
 
-            // 1. SINERGIA DE ULTIMATES (A Maldade Específica de cada Monstro)
-            if (session.MonsterUltCharge >= 2)
+            // 1. SINERGIA DE ULTIMATES
+            if (session.MonsterUltCharge >= 3)
             {
-                // A Caçadora ADORA quando tu metes o escudo, porque a Ult dela foi feita para o partir!
+                // A Caçadora adora quando o escudo está levantado
                 if (session.Enemy.Name.Contains("Caçadora", StringComparison.OrdinalIgnoreCase) && heroIsShielding) {
                     session.CombatLog.Add("🦅 [Tática Letal] A Caçadora sorri ao ver o teu escudo... Era a armadilha perfeita!");
                     return new Arena.Api.Domain.Entities.AiDecision("Ultimate", new UltimateAttack());
                 }
-                
-                // O Verme e o Xamã querem aleijar-te rápido (Roubar poção / Silenciar). Usam a Ult na primeira oportunidade!
-                if (session.Enemy.Name.Contains("Verme", StringComparison.OrdinalIgnoreCase) || session.Enemy.Name.Contains("Xamã", StringComparison.OrdinalIgnoreCase)) {
-                    return new Arena.Api.Domain.Entities.AiDecision("Ultimate", new UltimateAttack());
-                }
 
-                // Para os outros monstros: NÃO gastar a Ult se o Herói estiver de escudo levantado!
+                // Verme e Xamã usam ult na primeira oportunidade
+                if (session.Enemy.Name.Contains("Verme", StringComparison.OrdinalIgnoreCase) || session.Enemy.Name.Contains("Xamã", StringComparison.OrdinalIgnoreCase))
+                    return new Arena.Api.Domain.Entities.AiDecision("Ultimate", new UltimateAttack());
+
+                // Para outros monstros: evitar usar ult se herói tem escudo levantado
                 if (heroIsShielding && session.Player.CurrentHp > session.CurrentHeroMaxHp * 0.3) {
-                    // O Herói tem escudo, o monstro aproveita para curar, defender ou dar um ataque físico básico
-                    if (canHeal && session.Enemy.CurrentHp < session.CurrentMonsterMaxHp * 0.6 && session.MonsterPotions > 0)
+                    if (canHeal && session.Enemy.CurrentHp < session.CurrentMonsterMaxHp * 0.6)
                         return new Arena.Api.Domain.Entities.AiDecision("Heal", null);
-                    
+                    if (canDodge && heroUltReady && _random.Next(100) < 55) {
+                        session.CombatLog.Add("💨 [Tática] O monstro esquivou para preservar a Ultimate para o momento certo!");
+                        return new Arena.Api.Domain.Entities.AiDecision("Dodge", null);
+                    }
                     if (canDefend && _random.Next(100) < 50)
                         return new Arena.Api.Domain.Entities.AiDecision("Defend", null);
-                        
                     return new Arena.Api.Domain.Entities.AiDecision("Attack", new PhysicalAttack());
                 }
-                
-                // Se o herói não tem escudo ou está em desespero, MANDA A ULT!
+
                 return new Arena.Api.Domain.Entities.AiDecision("Ultimate", new UltimateAttack());
             }
 
-            // 2. INSTINTO DE CAÇADOR E INTERCEÇÃO DE POÇÃO
-            if (session.Player.CurrentHp <= session.CurrentHeroMaxHp * 0.25)
+            // 2. ESQUIVA PREVENTIVA CONTRA ULT DO HERÓI
+            if (canDodge && heroUltReady && _random.Next(100) < 40) {
+                session.CombatLog.Add("💨 [Instinto] O monstro sentiu o perigo e recuou numa esquiva ágil!");
+                return new Arena.Api.Domain.Entities.AiDecision("Dodge", null);
+            }
+
+            // 3. INSTINTO DE CAÇADOR: herói a sangrar com poções
+            if (session.Player.CurrentHp <= session.CurrentHeroMaxHp * 0.30)
             {
-                // O herói está a sangrar. Se tiver poções, de certeza que vai tentar curar-se.
                 if (canDefend && session.HeroPotions > 0) {
-                    // 60% de chance de o monstro ignorar o ataque e tentar interceptar e roubar a tua poção!
-                    if (_random.Next(100) < 60) {
+                    if (_random.Next(100) < 65) {
                         session.CombatLog.Add("🐺 [Instinto] O monstro fareja o teu desespero e tenta interceptar a tua cura!");
                         return new Arena.Api.Domain.Entities.AiDecision("Defend", null);
                     }
                 }
-                // Se não tentar roubar, ataca com tudo para finalizar!
                 return new Arena.Api.Domain.Entities.AiDecision("Attack", new PhysicalAttack());
             }
 
-            // 3. SOBREVIVÊNCIA OPORTUNISTA
-            if (session.Enemy.CurrentHp <= session.CurrentMonsterMaxHp * 0.40 && session.MonsterPotions > 0 && canHeal)
-            {
-                // Se houver Ventos Curativos, cura imediatamente para somar a vida. Senão, 85% de chance.
+            // 4. SOBREVIVÊNCIA OPORTUNISTA
+            if (session.Enemy.CurrentHp <= session.CurrentMonsterMaxHp * 0.45 && canHeal) {
                 if (session.CurrentArenaEvent == "HealingWinds" || _random.Next(100) < 85)
                     return new Arena.Api.Domain.Entities.AiDecision("Heal", null);
             }
 
-            // 4. DEFESA PREDITIVA CONTRA A TUA ULT
-            if (canDefend && session.HeroUltCharge >= 2)
-            {
-                // O monstro vê que a tua Ultimate está pronta. 50% de chance de erguer o escudo por precaução.
+            // 5. DEFESA PREDITIVA CONTRA ULT
+            if (canDefend && heroUltReady) {
                 if (_random.Next(100) < 50) return new Arena.Api.Domain.Entities.AiDecision("Defend", null);
             }
 
-            // 5. ATAQUE PADRÃO E FRENESI
+            // 6. ATAQUE PADRÃO
             if (session.CurrentArenaEvent == "BloodFrenzy")
                 return new Arena.Api.Domain.Entities.AiDecision("Attack", new PhysicalAttack());
 

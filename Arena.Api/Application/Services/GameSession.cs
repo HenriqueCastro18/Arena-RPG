@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
 using Arena.Api.Application.Commands;
 using Arena.Api.Application.Strategies.Ai;
 using Arena.Api.Domain.Entities;
@@ -57,6 +55,13 @@ namespace Arena.Api.Application.Services
         public bool HeroStolePotionThisTurn { get; set; }
         public bool MonsterStolePotionThisTurn { get; set; }
 
+        public int HeroDodgesLeft { get; set; }
+        public bool HeroDodgingThisTurn { get; set; }
+        public bool HeroBloodPactUsed { get; set; }
+
+        public int MonsterDodgesLeft { get; set; }
+        public bool MonsterDodgingThisTurn { get; set; }
+
         public int MonsterDamageBuffDuration { get; set; }
         public int MonsterUltStealDuration { get; set; }
 
@@ -80,11 +85,21 @@ namespace Arena.Api.Application.Services
             RoundsUntilNextEvent = rand.Next(1, 5);
             MonsterDamageBuffDuration = 0; MonsterUltStealDuration = 0;
             MonsterIsStunned = false; HeroPotionSilenceDuration = 0;
+            HeroDodgesLeft = 2; HeroDodgingThisTurn = false; HeroBloodPactUsed = false;
+            MonsterDodgesLeft = 2; MonsterDodgingThisTurn = false;
 
-            if (Enemy.Name.Contains("Chefe", StringComparison.OrdinalIgnoreCase) || Enemy.Name.Contains("Boss", StringComparison.OrdinalIgnoreCase) || Enemy.Name.Contains("Tático", StringComparison.OrdinalIgnoreCase)) {
+            // Detecção de Boss via ElementType (cobre todas as variantes: Chefe, Assassino, Furioso, Equilibrado)
+            if (Enemy.ElementType.Contains("Chefe", StringComparison.OrdinalIgnoreCase)) {
                 MonsterAi = new LearningBossAiStrategy();
                 MonsterPotions = 3; MonsterUltCharge = 1;
                 CombatLog.Add($"👁️ O {Enemy.Name} entra na arena! A sua aura é pesada e a sua Ultimate já começa a brilhar...");
+                string variantDesc = Enemy.ElementType switch {
+                    "Chefe Assassino"  => "⚔️ VARIANTE: Minotauro Tático — Mais resistente e feroz. Pune jogadores agressivos com bloqueios e contra-ataques letais.",
+                    "Chefe Furioso"    => "💥 VARIANTE: Minotauro Quebra-Guarda — Ataque brutal e devastador. Especializado em estilhaçar defesas.",
+                    "Chefe Equilibrado"=> "⚖️ VARIANTE: Minotauro Implacável — Equilibrado e versátil. Mais resistente e forte que a forma base.",
+                    _                  => "🐂 VARIANTE: Minotauro Chefe — A forma base do Boss. Calculista e perigoso desde o primeiro turno."
+                };
+                CombatLog.Add(variantDesc);
             } else {
                 MonsterAi = new RuthlessAiStrategy();
             }
@@ -97,17 +112,20 @@ namespace Arena.Api.Application.Services
             if (IsGameOver) return;
             if (CombatLog.Count > 0) { FullCombatLog.AddRange(CombatLog); FullCombatLog.Add("--- (Turno Extra: Pacto Sombrio) ---"); }
             CombatLog.Clear(); TriggeredEventThisRound = ""; 
-            if (CurrentHeroMaxHp <= Player.MaxHp * 0.60) {
-                CombatLog.Add($"⚠️ {Player.Name} tentou usar o Pacto de Sangue, mas o corpo está no limite!");
+            if (HeroBloodPactUsed) {
+                CombatLog.Add($"⚠️ {Player.Name} já selou o Pacto de Sangue. Não é possível repeti-lo nesta batalha!");
                 return;
             }
             HeroMaxHpPenalty += Player.MaxHp * 40 / 100;
+            HeroBloodPactUsed = true;
 
             // TRAVA DE SEGURANÇA: Garante que o HP Atual não excede o novo teto
             if (Player.CurrentHp > CurrentHeroMaxHp) Player.CurrentHp = CurrentHeroMaxHp;
 
-            HeroUltCharge = 2; HeroShieldDurability = 1; HeroShieldCooldown = 0;
-            CombatLog.Add($"🩸 PACTO DE SANGUE! {Player.Name} sacrificou HP Máximo pela Ultimate e Escudo!");
+            HeroUltCharge = Math.Min(2, HeroUltCharge + 1);
+            HeroShieldDurability = Math.Min(3, HeroShieldDurability + 1);
+            HeroShieldCooldown = 0;
+            CombatLog.Add($"🩸 PACTO DE SANGUE! {Player.Name} sacrificou HP Máximo e ganhou +1 carga de Ultimate e +1 carga de Escudo!");
         }
 
         public void ExecuteMonsterBloodPact()
@@ -131,6 +149,7 @@ namespace Arena.Api.Application.Services
             HeroStolePotionThisTurn = false; MonsterStolePotionThisTurn = false;
             LastHeroHealed = 0; LastMonsterHealed = 0; HeroDamageTaken = 0; MonsterDamageTaken = 0;
             HeroDefendedThisTurn = false; IsMonsterDefending = false; MonsterDefendedThisTurn = false;
+            HeroDodgingThisTurn = false; MonsterDodgingThisTurn = false;
 
             // 1. Verificação de Silêncio de Poções
             if (actionType == "Heal" && HeroPotionSilenceDuration > 0) {
@@ -138,7 +157,6 @@ namespace Arena.Api.Application.Services
                 CombatLog.Add("❌ [Maldição Espiritual] A aura negra impediu-te de beber a poção! Foste forçado a atacar!");
             }
 
-            if (!Enemy.Name.Contains("Chefe", StringComparison.OrdinalIgnoreCase) && !Enemy.Name.Contains("Boss", StringComparison.OrdinalIgnoreCase) && !Enemy.Name.Contains("Tático", StringComparison.OrdinalIgnoreCase))
             {
                 string context = "Normal";
                 if (HeroUltCharge >= 2) context = "HasUlt";
@@ -158,8 +176,8 @@ namespace Arena.Api.Application.Services
             if (actionType == "Defend" && heroCanDefend && monsterActionType == "Heal" && MonsterPotions > 0) HeroStolePotionThisTurn = true;
             if (monsterActionType == "Defend" && monsterCanDefend && actionType == "Heal" && HeroPotions > 0) MonsterStolePotionThisTurn = true;
 
-            int heroPriority = (actionType == "Heal" || actionType == "Defend") ? 1 : 2;
-            int monsterPriority = (monsterActionType == "Heal" || monsterActionType == "Defend") ? 1 : 2;
+            int heroPriority = (actionType == "Heal" || actionType == "Defend" || actionType == "Dodge") ? 1 : 2;
+            int monsterPriority = (monsterActionType == "Heal" || monsterActionType == "Defend" || monsterActionType == "Dodge") ? 1 : 2;
             MonsterActedFirst = (monsterPriority < heroPriority);
 
             var heroCommand = CommandFactory.Create(actionType);
@@ -198,8 +216,8 @@ namespace Arena.Api.Application.Services
             if (Player.CurrentHp > CurrentHeroMaxHp) Player.CurrentHp = CurrentHeroMaxHp;
             if (Enemy.CurrentHp > CurrentMonsterMaxHp) Enemy.CurrentHp = CurrentMonsterMaxHp;
 
-            // Ganho Passivo de Fúria dos Monstros
-            if (!Enemy.IsDead() && !Player.IsDead() && RoundCount % 2 == 0 && MonsterUltCharge < 2) {
+            // Ganho Passivo de Fúria dos Monstros (boss precisa de 3 cargas, monstros normais de 2 mas limitam em 3 também)
+            if (!Enemy.IsDead() && !Player.IsDead() && RoundCount % 2 == 0 && MonsterUltCharge < 3) {
                 MonsterUltCharge++;
                 CombatLog.Add($"⚠️ A fúria de {Enemy.Name} está a aumentar... (Ultimate a carregar)");
             }
@@ -208,7 +226,6 @@ namespace Arena.Api.Application.Services
             if (Enemy.IsDead() || Player.IsDead()) {
                 IsGameOver = true;
                 CombatLog.Add(Enemy.IsDead() ? $"{Enemy.Name} foi obliterado! Vitória!" : $"{Player.Name} caiu... Fim de jogo.");
-                ExportarTreinoJson();
             } else {
                 // Reduzir contadores de Debuff
                 if (HeroPotionSilenceDuration > 0) {
@@ -217,21 +234,27 @@ namespace Arena.Api.Application.Services
                 }
 
                 if (!HeroInSecondWind && Player.CurrentHp > 0 && Player.CurrentHp <= CurrentHeroMaxHp * 0.20) {
-                    HeroInSecondWind = true; Player.Heal(CurrentHeroMaxHp * 25 / 100); 
+                    HeroInSecondWind = true;
+                    Player.CurrentHp = Math.Min(CurrentHeroMaxHp, Player.CurrentHp + CurrentHeroMaxHp * 25 / 100);
                     TriggeredEventThisRound = "SecondWindHero";
                     CombatLog.Add($"🌪️ ÚLTIMO SUSPIRO! {Player.Name} recuperou HP e entrou num transe de adrenalina!");
                 }
                 if (!MonsterInSecondWind && Enemy.CurrentHp > 0 && Enemy.CurrentHp <= CurrentMonsterMaxHp * 0.20) {
-                    MonsterInSecondWind = true; Enemy.Heal(CurrentMonsterMaxHp * 25 / 100);
+                    MonsterInSecondWind = true;
+                    Enemy.CurrentHp = Math.Min(CurrentMonsterMaxHp, Enemy.CurrentHp + CurrentMonsterMaxHp * 25 / 100);
                     TriggeredEventThisRound = TriggeredEventThisRound == "SecondWindHero" ? "SecondWindBoth" : "SecondWindMonster";
                     CombatLog.Add($"🌪️ ÚLTIMO SUSPIRO INIMIGO! {Enemy.Name} curou HP e enfureceu-se!");
                 }
 
                 if (HeroInSecondWind) { if (HeroUltCharge < 2) HeroUltCharge++; HeroMaxHpPenalty += Player.MaxHp * 5 / 100; }
-                if (MonsterInSecondWind) { if (MonsterUltCharge < 2) MonsterUltCharge++; MonsterMaxHpPenalty += Enemy.MaxHp * 5 / 100; }
+                if (MonsterInSecondWind) { if (MonsterUltCharge < 3) MonsterUltCharge++; MonsterMaxHpPenalty += Enemy.MaxHp * 5 / 100; }
+                // Ajuste após penalidade do Último Suspiro reduzir o HP Máximo
+                if (HeroInSecondWind && Player.CurrentHp > CurrentHeroMaxHp) Player.CurrentHp = CurrentHeroMaxHp;
+                if (MonsterInSecondWind && Enemy.CurrentHp > CurrentMonsterMaxHp) Enemy.CurrentHp = CurrentMonsterMaxHp;
 
                 if (CurrentArenaEvent == "HealingWinds" && !IsGameOver) {
-                    Player.Heal(CurrentHeroMaxHp * 10 / 100); Enemy.Heal(CurrentMonsterMaxHp * 10 / 100);
+                    Player.CurrentHp = Math.Min(CurrentHeroMaxHp, Player.CurrentHp + CurrentHeroMaxHp * 10 / 100);
+                    Enemy.CurrentHp = Math.Min(CurrentMonsterMaxHp, Enemy.CurrentHp + CurrentMonsterMaxHp * 10 / 100);
                     CombatLog.Add($"🍃 Os Ventos Curativos restauraram vida a ambos os lutadores!");
                 }
 
@@ -257,9 +280,9 @@ namespace Arena.Api.Application.Services
                         else if (r==2) CombatLog.Add("✨ EVENTO DE ARENA: Bênção de Mana! As Ultimates carregam rápido!");
                         else if (r==3) CombatLog.Add("🩸 EVENTO DE ARENA: Frenesi de Batalha! (+50% de dano)");
                         else if (r==4) CombatLog.Add("🍃 EVENTO DE ARENA: Ventos Curativos ativados!");
-                        else if (r==5) { HeroUltCharge=0; MonsterUltCharge=0; CombatLog.Add("🌌 EVENTO DE ARENA (Instantâneo): Vazio de Mana sugou a Ultimate de ambos!"); }
-                        else if (r==6) { HeroPotions++; MonsterPotions++; CombatLog.Add("🎁 EVENTO DE ARENA (Instantâneo): Suprimentos! (+1 Poção para cada)"); }
-                        else if (r==7) { HeroShieldDurability=3; MonsterShieldDurability=3; HeroShieldCooldown=0; MonsterShieldCooldown=0; CombatLog.Add("🛡️ EVENTO DE ARENA (Instantâneo): Égide Divina restaurou os Escudos!"); }
+                        else if (r==5) { HeroUltCharge=0; MonsterUltCharge=0; CurrentArenaEvent = "Normal"; RoundsUntilNextEvent = rand.Next(1, 5); CombatLog.Add("🌌 EVENTO DE ARENA (Instantâneo): Vazio de Mana sugou a Ultimate de ambos!"); }
+                        else if (r==6) { HeroPotions++; MonsterPotions++; CurrentArenaEvent = "Normal"; RoundsUntilNextEvent = rand.Next(1, 5); CombatLog.Add("🎁 EVENTO DE ARENA (Instantâneo): Suprimentos! (+1 Poção para cada)"); }
+                        else if (r==7) { HeroShieldDurability=3; MonsterShieldDurability=3; HeroShieldCooldown=0; MonsterShieldCooldown=0; CurrentArenaEvent = "Normal"; RoundsUntilNextEvent = rand.Next(1, 5); CombatLog.Add("🛡️ EVENTO DE ARENA (Instantâneo): Égide Divina restaurou os Escudos!"); }
                     }
                 }
             }
@@ -287,76 +310,95 @@ namespace Arena.Api.Application.Services
                 CombatLog.Add("🦇 [Efeito: Drenagem Vital] Magia de sangue! O Mago Sombrio sugou a tua força vital para se curar massivamente!");
             }
             else if (Enemy.Name.Contains("Caçadora", StringComparison.OrdinalIgnoreCase)) {
-                HeroShieldDurability = 0; HeroShieldCooldown = 2;
-                CombatLog.Add("🦅 [Efeito: Tiro Sombrio] A flecha perfurou as tuas defesas críticas! O teu ESCUDO FOI COMPLETAMENTE ESTILHAÇADO!");
+                if (HeroDodgingThisTurn) {
+                    CombatLog.Add("💨 [Esquiva] A tua agilidade desviou o Tiro Sombrio! O escudo ficou intacto!");
+                } else {
+                    HeroShieldDurability = 0; HeroShieldCooldown = 2;
+                    CombatLog.Add("🦅 [Efeito: Tiro Sombrio] A flecha perfurou as tuas defesas críticas! O teu ESCUDO FOI COMPLETAMENTE ESTILHAÇADO!");
+                }
             }
             else if (Enemy.Name.Contains("Verme", StringComparison.OrdinalIgnoreCase)) {
-                if (HeroPotions > 0) {
+                if (HeroDodgingThisTurn) {
+                    CombatLog.Add("💨 [Esquiva] A tua agilidade impediu o Terremoto de atingir os teus mantimentos!");
+                } else if (HeroPotions > 0) {
                     HeroPotions--;
                     CombatLog.Add("🪱 [Efeito: Terremoto Devorador] O tremor engoliu os teus mantimentos! PERDESTE 1 POÇÃO PARA SEMPRE!");
                 }
             }
             else if (Enemy.Name.Contains("Guerreiro", StringComparison.OrdinalIgnoreCase)) {
-                HeroMaxHpPenalty += Player.MaxHp * 15 / 100;
-                CombatLog.Add("🪓 [Efeito: Golpe Fendido] O machado mutilou a tua armadura! O teu HP Máximo foi esmagado permanentemente!");
+                if (HeroDodgingThisTurn) {
+                    CombatLog.Add("💨 [Esquiva] A tua esquiva evitou o Golpe Fendido! A tua armadura ficou intacta!");
+                } else {
+                    HeroMaxHpPenalty += Player.MaxHp * 15 / 100;
+                    CombatLog.Add("🪓 [Efeito: Golpe Fendido] O machado mutilou a tua armadura! O teu HP Máximo foi esmagado permanentemente!");
+                }
             }
             else if (Enemy.Name.Contains("Xamã", StringComparison.OrdinalIgnoreCase)) {
-                HeroPotionSilenceDuration = 3; // 3 rodadas contando com o tick de fim de turno
-                CombatLog.Add("💀 [Efeito: Maldição Espiritual] Uma aura negra envolve as tuas poções. Estás IMPEDIDO de te curar durante 2 turnos!");
-            }
-            else if (Enemy.Name.Contains("Tático", StringComparison.OrdinalIgnoreCase) || Enemy.Name.Contains("Boss", StringComparison.OrdinalIgnoreCase) || Enemy.Name.Contains("Chefe", StringComparison.OrdinalIgnoreCase)) {
-                
-                // Redução de 50% de HP Máximo
-                HeroMaxHpPenalty += CurrentHeroMaxHp / 2;
-                CombatLog.Add("⚖️ [Efeito: Execução Tática] O Chefe esmagou 50% da tua vitalidade máxima permanentemente!");
-                
-                // Mantém o roubo de fúria se o jogador a tiver
-                if (HeroUltCharge > 0) {
-                    HeroUltCharge = 0;
-                    if (MonsterUltCharge < 2) MonsterUltCharge++;
-                    CombatLog.Add("⚖️ Além disso, ele leu o teu desespero e ROUBOU toda a tua carga de Ultimate!");
+                if (HeroDodgingThisTurn) {
+                    CombatLog.Add("💨 [Esquiva] A tua agilidade quebrou a Maldição Espiritual antes de te atingir!");
                 } else {
-                    CombatLog.Add("⚖️ Ele tentou roubar a tua Ultimate, mas não tinhas fúria nenhuma!");
+                    HeroPotionSilenceDuration = 3;
+                    CombatLog.Add("💀 [Efeito: Maldição Espiritual] Uma aura negra envolve as tuas poções. Estás IMPEDIDO de te curar durante 2 turnos!");
+                }
+            }
+            else if (Enemy.ElementType.Contains("Chefe", StringComparison.OrdinalIgnoreCase)) {
+                // PACTO SOMBRIO: se o player esquivou ou defendeu, apenas o dano da Ultimate passa — sem efeito secundário
+                bool playerProtected = HeroDodgingThisTurn || HeroDefendedThisTurn;
+
+                if (playerProtected) {
+                    string protection = HeroDodgingThisTurn ? "💨 esquiva" : "🛡️ escudo";
+                    CombatLog.Add($"⚖️ [Pacto Sombrio] A tua {protection} resistiu ao Pacto! O dano físico passou, mas a tua vitalidade máxima ficou intacta!");
+                } else {
+                    // Drena 35% do HP máximo atual permanentemente
+                    int drain = CurrentHeroMaxHp * 35 / 100;
+                    HeroMaxHpPenalty += drain;
+                    CombatLog.Add("⚖️ [Pacto Sombrio] O feitiço selou o teu destino! 35% do teu HP Máximo foi drenado permanentemente!");
+
+                    // Ajusta HP se exceder o novo máximo
+                    if (Player.CurrentHp > CurrentHeroMaxHp) Player.CurrentHp = CurrentHeroMaxHp;
+
+                    // Rouba carga de Ultimate (sem ganho para o Boss)
+                    if (HeroUltCharge > 0) {
+                        HeroUltCharge = 0;
+                        CombatLog.Add("⚖️ A escuridão do Pacto CONSUMIU toda a tua carga de Ultimate!");
+                    }
                 }
             }
         }
 
-        private void ExportarTreinoJson()
+        public TrainingReport BuildTrainingReport()
         {
-            try
-            {
-                var logFinalDaLuta = new List<string>(FullCombatLog);
-                logFinalDaLuta.AddRange(CombatLog);
+            var log = new List<string>(FullCombatLog);
+            log.AddRange(CombatLog);
 
-                var relatorio = new
-                {
-                    Data = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
-                    Batalha = $"{Player.Name} vs {Enemy.Name}",
-                    Vencedor = Player.IsDead() ? Enemy.Name : Player.Name,
-                    TotalTurnos = RoundCount,
-                    CerebroDaIA = new 
-                    {
-                        VezesQueOJogadorCurouNoDesespero = PlayerPatternTracker.LowHpHeals,
-                        VezesQueOJogadorAtacouNoDesespero = PlayerPatternTracker.LowHpAttacks,
-                        Conclusao_CurarNoDesespero = PlayerPatternTracker.PredizCuraNoDesespero(),
-                        VezesQueOJogadorDefendeuDaUlt = PlayerPatternTracker.BossHasUltDefends,
-                        VezesQueOJogadorIgnorouAUlt = PlayerPatternTracker.BossHasUltOtherActions,
-                        Conclusao_EscudoNoMedo = PlayerPatternTracker.PredizEscudoNoMedo()
-                    },
-                    HistoricoDeTurnos = logFinalDaLuta
-                };
-
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonString = JsonSerializer.Serialize(relatorio, options);
-                string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "LogsDeTreino");
-                if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
-
-                string fileName = $"Treino_{Enemy.Name.Replace(" ", "")}_{DateTime.Now:HHmmss_ffff}.json";
-                string fullPath = Path.Combine(directoryPath, fileName);
-                File.WriteAllText(fullPath, jsonString);
-                Console.WriteLine($"[Arena] JSON de Treino exportado para a raiz: {fullPath}");
-            }
-            catch (Exception ex) { Console.WriteLine($"[Arena] Erro ao gerar JSON de treino: {ex.Message}"); }
+            return new TrainingReport(
+                Data: DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
+                Batalha: $"{Player.Name} vs {Enemy.Name}",
+                Vencedor: Player.IsDead() ? Enemy.Name : Player.Name,
+                TotalTurnos: RoundCount,
+                CerebroDaIA: new AiReport(
+                    VezesQueOJogadorCurouNoDesespero:    PlayerPatternTracker.LowHpHeals,
+                    VezesQueOJogadorAtacouNoDesespero:   PlayerPatternTracker.LowHpAttacks,
+                    VezesQueOJogadorDefendeuNoDesespero: PlayerPatternTracker.LowHpDefends,
+                    Conclusao_CurarNoDesespero:          PlayerPatternTracker.PredizCuraNoDesespero(),
+                    VezesQueOJogadorDefendeuDaUlt:       PlayerPatternTracker.BossHasUltDefends,
+                    VezesQueOJogadorIgnorouAUlt:         PlayerPatternTracker.BossHasUltOtherActions,
+                    VezesQueOJogadorUsouUltContraUlt:    PlayerPatternTracker.BossHasUltUltimateUses,
+                    Conclusao_EscudoNoMedo:              PlayerPatternTracker.PredizEscudoNoMedo(),
+                    Conclusao_UltimateSemMedo:           PlayerPatternTracker.PredizUltimateBruta(),
+                    TotalAcoes:                          PlayerPatternTracker.TotalActions,
+                    Ataques:                             PlayerPatternTracker.PhysicalAttacks,
+                    Ultimates:                           PlayerPatternTracker.UltimateActions,
+                    Curas:                               PlayerPatternTracker.HealActions,
+                    Defesas:                             PlayerPatternTracker.DefendActions,
+                    PontuacaoAgressividade:              PlayerPatternTracker.GetAggressivenessScore(),
+                    Conclusao_JogadorAgressivo:          PlayerPatternTracker.PredizJogadorAgressivo(),
+                    Conclusao_JogadorDefensivo:          PlayerPatternTracker.PredizJogadorDefensivo(),
+                    MaxAtaquesConsecutivos:              PlayerPatternTracker.MaxConsecutiveAttacks,
+                    UltimaAcaoRegistada:                 PlayerPatternTracker.LastAction
+                ),
+                HistoricoDeTurnos: log.AsReadOnly()
+            );
         }
     }
 }

@@ -28,14 +28,14 @@ namespace Arena.Api.Application.Commands
                 session.CombatLog.Add($"🥷 INTERROMPIDO! {thiefName} antecipou o movimento e ROUBOU a poção de {characterName}!");
                 if (session.CurrentArenaEvent != "ToxicGas")
                 {
-                    int healAmount = (isHero ? session.CurrentMonsterMaxHp : session.CurrentHeroMaxHp) * 40 / 100;
-                    
-                    // Cura o Ladrão!
-                    if (isHero) session.Enemy.Heal(healAmount);
-                    else session.Player.Heal(healAmount);
+                    int thiefMaxHp = isHero ? session.CurrentMonsterMaxHp : session.CurrentHeroMaxHp;
+                    int healAmount = thiefMaxHp * 40 / 100;
 
-                    // Regista para o UI
-                    if (isHero) session.LastMonsterHealed = healAmount; 
+                    // Cura o Ladrão, capped ao HP máximo efetivo
+                    if (isHero) session.Enemy.CurrentHp = Math.Min(thiefMaxHp, session.Enemy.CurrentHp + healAmount);
+                    else session.Player.CurrentHp = Math.Min(thiefMaxHp, session.Player.CurrentHp + healAmount);
+
+                    if (isHero) session.LastMonsterHealed = healAmount;
                     else session.LastHeroHealed = healAmount;
                     
                     session.CombatLog.Add($"{thiefName} bebeu a poção roubada e recuperou HP nas tuas barbas!");
@@ -55,17 +55,16 @@ namespace Arena.Api.Application.Commands
                 {
                     int healAmount = maxHp * 40 / 100;
                     int hpBefore = isHero ? session.Player.CurrentHp : session.Enemy.CurrentHp;
-                    
-                    // Cura quem usou a poção
-                    if (isHero) session.Player.Heal(healAmount);
-                    else session.Enemy.Heal(healAmount);
+
+                    // Cura capped ao HP máximo EFETIVO (respeitando penalidades)
+                    if (isHero) session.Player.CurrentHp = Math.Min(maxHp, session.Player.CurrentHp + healAmount);
+                    else session.Enemy.CurrentHp = Math.Min(maxHp, session.Enemy.CurrentHp + healAmount);
 
                     int actuallyHealed = (isHero ? session.Player.CurrentHp : session.Enemy.CurrentHp) - hpBefore;
-                    
-                    // Regista para o UI
-                    if (isHero) session.LastHeroHealed = actuallyHealed; 
+
+                    if (isHero) session.LastHeroHealed = actuallyHealed;
                     else session.LastMonsterHealed = actuallyHealed;
-                    
+
                     session.CombatLog.Add($"{characterName} bebeu uma Poção e recuperou {actuallyHealed} de HP!");
                 }
             }

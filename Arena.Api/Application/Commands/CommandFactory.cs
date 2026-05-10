@@ -8,11 +8,12 @@ namespace Arena.Api.Application.Commands
         {
             return actionType switch
             {
-                "Heal" => new HealCommand(),
-                "Defend" => new DefendCommand(),
+                "Heal"    => new HealCommand(),
+                "Defend"  => new DefendCommand(),
+                "Dodge"   => new DodgeCommand(),
                 "Physical" => new AttackCommand(),
                 "Ultimate" => new AttackCommand(),
-                "Attack" => new AttackCommand(), // Fallback
+                "Attack"  => new AttackCommand(),
                 _ => throw new ArgumentException($"Comando desconhecido: {actionType}")
             };
         }

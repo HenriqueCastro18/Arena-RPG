@@ -570,6 +570,15 @@
             box-shadow: 0 0 20px var(--danger);
         }
 
+        #btnDodge {
+            background: linear-gradient(135deg, #16a085, #1abc9c);
+        }
+
+        #btnDodge:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1abc9c, #48c9b0);
+            box-shadow: 0 0 18px rgba(26, 188, 156, 0.6);
+        }
+
         @keyframes pulseUlt {
             from {
                 transform: scale(1);
@@ -874,7 +883,134 @@
                 font-size: 20px;
             }
         }
+
+        /* === SHIELD & ULT PIPS === */
+        .hud-status-row { display:flex; gap:10px; margin-top:8px; align-items:center; flex-wrap:wrap; }
+        .hud-card.right .hud-status-row { justify-content:flex-end; }
+        .pip-group { display:flex; align-items:center; gap:3px; }
+        .pip-label { font-size:12px; color:#888; margin-right:2px; }
+        .pip-s { width:8px; height:13px; border-radius:2px; background:linear-gradient(180deg,#3498db,#2471a3); box-shadow:0 0 5px rgba(52,152,219,0.5); transition:all 0.3s; }
+        .pip-s.off { background:#252530; box-shadow:none; opacity:0.4; }
+        .pip-u { width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,#e67e22,#f39c12); box-shadow:0 0 6px rgba(243,156,18,0.6); transition:all 0.3s; }
+        .pip-u.off { background:#252530; box-shadow:none; opacity:0.4; }
+        .pip-u.glow { animation:pipGlow 0.9s infinite alternate; }
+        @keyframes pipGlow { from{box-shadow:0 0 6px rgba(243,156,18,0.7);} to{box-shadow:0 0 18px rgba(241,196,15,1);transform:scale(1.25);} }
+        .pip-d { width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg,#1abc9c,#16a085); box-shadow:0 0 5px rgba(26,188,156,0.5); transition:all 0.3s; }
+        .pip-d.off { background:#252530; box-shadow:none; opacity:0.4; }
+
+        /* === GAME OVER PANEL === */
+        .game-over-panel { display:none; text-align:center; margin-top:12px; gap:10px; justify-content:center; flex-wrap:wrap; }
+        .game-over-panel button { padding:14px 32px; font-size:16px; font-family:var(--font-rpg); font-weight:600; border-radius:8px; border:1px solid transparent; cursor:pointer; transition:all 0.3s; letter-spacing:1px; }
+        .btn-retry { background:linear-gradient(135deg,#27ae60,#2ecc71); color:#fff; border-color:#27ae60; }
+        .btn-retry:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(46,204,113,0.4); }
+        .btn-exit-game { background:linear-gradient(135deg,#555,#333); color:#ccc; border-color:#444; }
+        .btn-exit-game:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,0.4); }
+
+        /* === STATUS STRIP === */
+        .status-strip { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:8px auto 4px; max-width:950px; padding:0 10px; box-sizing:border-box; }
+        .s-chip { display:flex; align-items:center; gap:5px; background:rgba(0,0,0,0.65); border:1px solid var(--glass-border); border-radius:999px; padding:4px 14px; font-family:var(--font-ui); font-size:13px; font-weight:600; color:#666; backdrop-filter:blur(5px); white-space:nowrap; transition:all 0.3s; }
+        .s-chip.on { border-color:var(--primary); color:#ddd; box-shadow:0 0 10px rgba(155,89,182,0.25); }
+        .s-chip.danger { border-color:#e74c3c; color:#e74c3c; }
+
+        /* === LOG ENTRY COLORS === */
+        .le-atk { color:#e74c3c; }
+        .le-heal { color:#2ecc71; }
+        .le-def { color:#5dade2; }
+        .le-dodge { color:#1abc9c; }
+        .le-ult { color:#f39c12; }
+        .le-event { color:#9b59b6; }
+        .le-boss { color:#e67e22; }
+        .le-blood { color:#c0392b; }
+        .le-win { color:#f1c40f; font-weight:700; font-size:16px; }
+        .le-sys { color:#4a4a5a; }
+        .log-entry { margin:4px 0; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.04); line-height:1.4; }
+
+        /* === BETTER MOBILE GRID === */
+        @media (max-width:580px) {
+            .controls { display:grid !important; grid-template-columns:1fr 1fr 1fr; gap:8px !important; padding:0 4px; }
+            .controls button { flex:none !important; min-width:0 !important; padding:11px 3px !important; font-size:11px !important; letter-spacing:0; }
+            #btnBloodPact { grid-column:1/-1; }
+        }
+
+        /* MODAL DO BOSS */
+        #bossModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.82);
+            z-index: 9000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        #bossModal.active { display: flex; }
+        .boss-modal-panel {
+            background: linear-gradient(160deg, #1a0a0a 0%, #12121a 100%);
+            border: 1px solid rgba(231,76,60,0.4);
+            border-radius: 16px;
+            box-shadow: 0 0 60px rgba(231,76,60,0.25), 0 0 120px rgba(0,0,0,0.8);
+            padding: 36px 40px;
+            max-width: 560px;
+            width: 90%;
+            text-align: center;
+        }
+        .boss-modal-panel h2 {
+            font-family: var(--font-rpg);
+            color: #e74c3c;
+            font-size: 26px;
+            margin-bottom: 6px;
+            text-shadow: 0 0 20px rgba(231,76,60,0.7);
+        }
+        .boss-modal-panel .boss-subtitle {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 22px;
+        }
+        .boss-variants { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; text-align: left; }
+        .boss-variant-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+        .boss-variant-card .variant-name {
+            font-family: var(--font-rpg);
+            font-size: 14px;
+            color: #e74c3c;
+            margin-bottom: 3px;
+        }
+        .boss-variant-card .variant-desc {
+            font-size: 13px;
+            color: #bbb;
+            line-height: 1.4;
+        }
+        .boss-modal-note {
+            font-size: 13px;
+            color: #888;
+            font-style: italic;
+            margin-bottom: 24px;
+        }
+        #btnBossConfirm {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 16px 40px;
+            font-family: var(--font-rpg);
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(231,76,60,0.4);
+            transition: all 0.2s;
+        }
+        #btnBossConfirm:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 35px rgba(231,76,60,0.7);
+        }
     </style>
+    <script src="config.js"></script>
 </head>
 
 <body>
@@ -991,14 +1127,23 @@
                     <div class="hp-bar-bg">
                         <div id="heroHpBar" class="hp-bar-fill"></div>
                     </div>
+                    <div class="hud-status-row">
+                        <div class="pip-group"><span class="pip-label">🛡️</span><div class="pip-s" id="hSP1"></div><div class="pip-s" id="hSP2"></div><div class="pip-s" id="hSP3"></div></div>
+                        <div class="pip-group"><span class="pip-label">⚡</span><div class="pip-u" id="hUP1"></div><div class="pip-u" id="hUP2"></div></div>
+                        <div class="pip-group"><span class="pip-label">💨</span><div class="pip-d" id="hDP1"></div><div class="pip-d" id="hDP2"></div></div>
+                        <div class="pip-group"><span class="pip-label">🧪</span><span id="hPotLbl" style="font-size:13px;color:#aaa;">3</span></div>
+                    </div>
                 </div>
 
                 <div class="hud-card right">
                     <h2 id="monsterNameDisplay">Monstro</h2>
-                    <span class="hp-text">HP: <span id="monsterHpText">0</span> / <span
-                            id="monsterMaxHpText">0</span></span>
+                    <span class="hp-text">HP: <span id="monsterHpText">0</span> / <span id="monsterMaxHpText">0</span></span>
                     <div class="hp-bar-bg">
                         <div id="monsterHpBar" class="hp-bar-fill monster-hp"></div>
+                    </div>
+                    <div class="hud-status-row">
+                        <div class="pip-group"><span class="pip-label">🛡️</span><div class="pip-s" id="mSP1"></div><div class="pip-s" id="mSP2"></div><div class="pip-s" id="mSP3"></div></div>
+                        <div class="pip-group"><span class="pip-label">💨</span><div class="pip-d" id="mDP1"></div><div class="pip-d" id="mDP2"></div></div>
                     </div>
                 </div>
             </div>
@@ -1015,13 +1160,24 @@
             </div>
         </div>
 
-        <div class="controls">
+        <div class="status-strip">
+            <span class="s-chip on" id="sChipEvent">🌍 Arena Normal</span>
+            <span class="s-chip on" id="sChipDodge">💨 Esquivas: 2</span>
+            <span class="s-chip on" id="sChipMonShield">🛡️ Inimigo: OK</span>
+        </div>
+
+        <div class="controls" id="actionControls">
             <button id="btnFisico" onclick="performAction('Physical')" disabled>🗡️ Ataque</button>
             <button id="btnDefend" onclick="performAction('Defend')" disabled>🛡️ Defender</button>
             <button id="btnHeal" onclick="performAction('Heal')" disabled>🧪 Poção (0/3)</button>
             <button id="btnUlt" onclick="performAction('Ultimate')" disabled>🌟 ULT (0/2)</button>
-            <button id="btnBloodPact" onclick="performBloodPact()" disabled title="Sacrifica o HP Máximo pela ULT!">🩸
-                Pacto Sombrio</button>
+            <button id="btnDodge" onclick="performAction('Dodge')" disabled title="Esquiva 100% do próximo ataque. Limite: 2 por combate.">💨 Esquivar (2)</button>
+            <button id="btnBloodPact" onclick="performBloodPact()" disabled title="Sacrifica o HP Máximo pela ULT!">🩸 Pacto Sombrio</button>
+        </div>
+
+        <div class="game-over-panel" id="gameOverPanel">
+            <button class="btn-retry" onclick="retryFight()">🔄 RETRY</button>
+            <button class="btn-exit-game" onclick="exitToMenu()">🚪 SAIR</button>
         </div>
 
         <div class="log-box" id="logBox">
@@ -1030,14 +1186,15 @@
     </div>
 
     <script>
-        const API_URL = "https://arena-rpg-qzq0.onrender.com/api/game";
+        const API_URL = CONFIG.API_URL;
         let currentSessionId = null;
         let maxHeroHp = 100, maxMonsterHp = 100;
         let originalMaxHeroHp = 100, originalMaxMonsterHp = 100;
         let currentHeroHp = 100, currentMonsterHp = 100;
 
-        let ultCharge = 0, potionsLeft = 3;
+        let ultCharge = 0, potionsLeft = 3, dodgesLeft = 2, bloodPactUsed = false;
         let heroShieldDur = 3, heroShieldCd = 0;
+        let monsterShieldDur = 3, monsterShieldCd = 0, monsterDodgesLeft = 2;
         const ULT_LIMIT = 2;
         let isAttacking = false;
 
@@ -1122,7 +1279,19 @@
 
         function appendLog(text) {
             const lb = document.getElementById('logBox');
-            lb.innerHTML += `<div class="log-entry">${text}</div>`;
+            const t = text || '';
+            let cls = 'le-sys';
+            if (t.includes('---')) cls = 'le-sys';
+            else if (t.includes('💨') || t.includes('ESQUIV') || t.includes('esquiv')) cls = 'le-dodge';
+            else if (t.includes('🩸 PACTO') || t.includes('sacrificou HP')) cls = 'le-blood';
+            else if (t.includes('💥') || t.includes('🔥') || t.includes('ULTIMATE') || t.includes('⚖️') || t.includes('🌟') || t.includes('🎯') || t.includes('👑 [') || t.includes('🦇') || t.includes('🦅') || t.includes('🪱') || t.includes('🪓') || t.includes('💀')) cls = 'le-ult';
+            else if (t.includes('🗡️') || t.includes('Revide') || t.includes('causou')) cls = 'le-atk';
+            else if (t.includes('🧪') || t.includes('curou') || t.includes('recuperou') || t.includes('🍃') || t.includes('poção') || t.includes('Poção')) cls = 'le-heal';
+            else if (t.includes('🛡️') || t.includes('BLOQUEOU') || t.includes('defensiva') || t.includes('escudo')) cls = 'le-def';
+            else if (t.includes('🧠')) cls = 'le-boss';
+            else if (t.includes('☠️') || t.includes('⚡ EVENTO') || t.includes('✨ EVENTO') || t.includes('🎁') || t.includes('🌌') || t.includes('ÚLTIMO SUSPIRO') || t.includes('⚠️') || t.includes('fúria') || t.includes('MASMORRA') || t.includes('FASE')) cls = 'le-event';
+            else if (t.includes('batalha entre') || t.includes('Vitória') || t.includes('obliterado') || t.includes('caiu') || t.includes('Fim de jogo')) cls = 'le-win';
+            lb.innerHTML += `<div class="log-entry ${cls}">${t}</div>`;
             lb.scrollTop = lb.scrollHeight;
         }
 
@@ -1144,6 +1313,52 @@
             void arena.offsetWidth;
             arena.classList.add(`shake-${intensity}`);
             setTimeout(() => arena.classList.remove(`shake-${intensity}`), 500);
+        }
+
+        function updatePips() {
+            // Hero shield pips
+            const hShield = heroShieldCd > 0 ? 0 : Math.max(0, heroShieldDur);
+            for (let i = 1; i <= 3; i++) {
+                const p = document.getElementById(`hSP${i}`);
+                if (p) p.className = 'pip-s' + (i <= hShield ? '' : ' off');
+            }
+            // Hero ult pips
+            for (let i = 1; i <= 2; i++) {
+                const p = document.getElementById(`hUP${i}`);
+                if (!p) continue;
+                if (ultCharge >= 2) p.className = 'pip-u glow';
+                else p.className = 'pip-u' + (i <= ultCharge ? '' : ' off');
+            }
+            // Hero dodge pips
+            for (let i = 1; i <= 2; i++) {
+                const p = document.getElementById(`hDP${i}`);
+                if (p) p.className = 'pip-d' + (i <= dodgesLeft ? '' : ' off');
+            }
+            // Potion label
+            const pl = document.getElementById('hPotLbl');
+            if (pl) pl.textContent = potionsLeft;
+            // Monster shield pips
+            const mShield = monsterShieldCd > 0 ? 0 : Math.max(0, monsterShieldDur);
+            for (let i = 1; i <= 3; i++) {
+                const p = document.getElementById(`mSP${i}`);
+                if (p) p.className = 'pip-s' + (i <= mShield ? '' : ' off');
+            }
+            // Monster dodge pips
+            for (let i = 1; i <= 2; i++) {
+                const p = document.getElementById(`mDP${i}`);
+                if (p) p.className = 'pip-d' + (i <= monsterDodgesLeft ? '' : ' off');
+            }
+            // Status strip chips
+            const dodgeEl = document.getElementById('sChipDodge');
+            if (dodgeEl) {
+                dodgeEl.textContent = dodgesLeft > 0 ? `💨 Esquivas: ${dodgesLeft}` : '💨 Sem Esquivas';
+                dodgeEl.className = dodgesLeft > 0 ? 's-chip on' : 's-chip danger';
+            }
+            const monShEl = document.getElementById('sChipMonShield');
+            if (monShEl) {
+                if (monsterShieldCd > 0) { monShEl.textContent = `🛡️ Inimigo: Quebrado (${monsterShieldCd})`; monShEl.className = 's-chip danger'; }
+                else { monShEl.textContent = `🛡️ Inimigo: ${mShield}/3`; monShEl.className = mShield > 0 ? 's-chip on' : 's-chip danger'; }
+            }
         }
 
         class SpriteEngine {
@@ -1290,14 +1505,33 @@
             }
         }
 
+        function showBossModal(onConfirm) {
+            const modal = document.getElementById('bossModal');
+            modal.classList.add('active');
+            document.getElementById('btnBossConfirm').onclick = () => {
+                modal.classList.remove('active');
+                onConfirm();
+            };
+        }
+
         async function confirmStart() {
+            const isBoss = isDungeonMode
+                ? false
+                : document.getElementById('monsterSelect').value === 'MinotaurBoss';
+
             if (isDungeonMode) {
                 dungeonIndex = 0;
                 document.getElementById('monsterSelect').value = dungeonQueue[dungeonIndex];
             }
+
             document.getElementById('setupScreen').style.display = 'none';
             document.getElementById('gameArena').style.display = 'block';
-            startGame();
+
+            if (isBoss) {
+                showBossModal(() => startGame());
+            } else {
+                startGame();
+            }
         }
 
         function updateButtons() {
@@ -1306,6 +1540,7 @@
                 isGameRunning = false;
                 return;
             }
+            updatePips();
 
             const btnUlt = document.getElementById('btnUlt');
             btnUlt.innerText = `🌟 ULT (${ultCharge}/${ULT_LIMIT})`;
@@ -1329,15 +1564,26 @@
 
             document.getElementById('btnFisico').disabled = false;
 
+            const btnDodge = document.getElementById('btnDodge');
+            if (dodgesLeft <= 0) {
+                btnDodge.disabled = true;
+                btnDodge.innerText = '💨 Sem Esquivas';
+                btnDodge.style.background = 'linear-gradient(135deg, #1a1a1a, #2c2c2c)';
+            } else {
+                btnDodge.disabled = false;
+                btnDodge.innerText = `💨 Esquivar (${dodgesLeft})`;
+                btnDodge.style.background = 'linear-gradient(135deg, #16a085, #1abc9c)';
+            }
+
             const btnBloodPact = document.getElementById('btnBloodPact');
-            if (maxHeroHp <= originalMaxHeroHp * 0.60) {
+            if (bloodPactUsed) {
                 btnBloodPact.disabled = true;
-                btnBloodPact.innerText = "🩸 Esgotado";
-                btnBloodPact.title = "O teu corpo já não aguenta mais sacrifícios nesta batalha!";
+                btnBloodPact.innerText = "🩸 Pacto Selado";
+                btnBloodPact.title = "O Pacto de Sangue já foi selado nesta batalha!";
             } else {
                 btnBloodPact.disabled = false;
                 btnBloodPact.innerText = "🩸 Pacto Sombrio";
-                btnBloodPact.title = "Sacrifica 40% do teu HP Máximo original para restaurar a ULT e 1 carga de escudo!";
+                btnBloodPact.title = "Sacrifica 40% do teu HP Máximo para ganhar +1 carga de Ultimate e +1 carga de Escudo!";
             }
         }
 
@@ -1346,7 +1592,18 @@
             document.getElementById('btnDefend').disabled = true;
             document.getElementById('btnUlt').disabled = true;
             document.getElementById('btnHeal').disabled = true;
+            document.getElementById('btnDodge').disabled = true;
             document.getElementById('btnBloodPact').disabled = true;
+        }
+
+        function retryFight() {
+            document.getElementById('gameOverPanel').style.display = 'none';
+            startGame();
+        }
+
+        function exitToMenu() {
+            isGameRunning = false;
+            location.reload();
         }
 
         async function startGame() {
@@ -1376,8 +1633,9 @@
 
             const h = document.getElementById('heroSelect').value;
             const m = document.getElementById('monsterSelect').value;
-            ultCharge = 0; potionsLeft = 3; isAttacking = false;
-            heroShieldDur = 3; heroShieldCd = 0;
+            ultCharge = 0; potionsLeft = 3; dodgesLeft = 2; bloodPactUsed = false; isAttacking = false;
+            heroShieldDur = 3; heroShieldCd = 0; monsterShieldDur = 3; monsterShieldCd = 0; monsterDodgesLeft = 2;
+            document.getElementById('gameOverPanel').style.display = 'none';
             disableAllButtons();
 
             if (heroEngine) heroEngine.stop(); if (monsterEngine) monsterEngine.stop();
@@ -1404,6 +1662,9 @@
             document.getElementById('heroCanvas').style.transform = `scale(${hConfig.scale}) translateY(${hConfig.offsetY}px)`;
             document.getElementById('monsterCanvas').style.transform = `scaleX(-1) scale(${mConfig.scale}) translateY(${mConfig.offsetY}px)`;
 
+            // Inicia animações imediatamente — sem esperar a resposta da API (fix do delay visual)
+            heroEngine.play('idle'); monsterEngine.play('idle');
+
             try {
                 const res = await fetch(`${API_URL}/start`, {
                     method: "POST", headers: { "Content-Type": "application/json" },
@@ -1428,8 +1689,10 @@
                 if (data.heroUltCharge !== undefined) ultCharge = data.heroUltCharge;
                 if (data.heroShieldDurability !== undefined) heroShieldDur = data.heroShieldDurability;
                 if (data.heroShieldCooldown !== undefined) heroShieldCd = data.heroShieldCooldown;
+                if (data.heroDodgesLeft !== undefined) dodgesLeft = data.heroDodgesLeft;
+                if (data.monsterShieldDurability !== undefined) monsterShieldDur = data.monsterShieldDurability;
+                if (data.monsterDodgesLeft !== undefined) monsterDodgesLeft = data.monsterDodgesLeft;
 
-                heroEngine.play('idle'); monsterEngine.play('idle');
                 updateUI(currentHeroHp, currentMonsterHp, data);
                 updateButtons();
 
@@ -1450,6 +1713,8 @@
             try {
                 const res = await fetch(`${API_URL}/${currentSessionId}/bloodpact`, { method: "POST" });
                 const data = await res.json();
+
+                if (data.heroBloodPactUsed !== undefined) bloodPactUsed = data.heroBloodPactUsed;
 
                 if (data.heroMaxHp === maxHeroHp) {
                     while (logIndex < data.log.length) { appendLog(data.log[logIndex++]); }
@@ -1488,6 +1753,7 @@
             if (actionType === 'Physical') playerStats.totalAttacks++;
             if (actionType === 'Heal') playerStats.totalHeals++;
             if (actionType === 'Defend') playerStats.totalDefends++;
+            if (actionType === 'Dodge') playerStats.totalDefends++;
             if (actionType === 'Ultimate') playerStats.totalUlts++;
 
             initAudio(); isAttacking = true; disableAllButtons();
@@ -1495,6 +1761,7 @@
             let isUlt = actionType === 'Ultimate';
             let isHeal = actionType === 'Heal';
             let isDefend = actionType === 'Defend';
+            let isDodge = actionType === 'Dodge';
 
             let data = null;
             let gameOver = false;
@@ -1542,6 +1809,7 @@
                     const isActionUlt = isHeroTurn ? isUlt : (data.monsterAction === 'Ultimate');
                     const isActionHeal = isHeroTurn ? isHeal : (data.monsterAction === 'Heal');
                     const isActionDefend = isHeroTurn ? isDefend : (data.monsterAction === 'Defend');
+                    const isActionDodge = isHeroTurn ? isDodge : false;
 
                     const engine = isHeroTurn ? heroEngine : monsterEngine;
                     const wrapper = isHeroTurn ? 'heroWrapper' : 'monsterWrapper';
@@ -1573,6 +1841,13 @@
                         safeLog();
                         await delay(800);
                     }
+                    else if (isActionDodge) {
+                        playDefendSound();
+                        spawnFloatingText(wrapper, `💨 ESQUIVA!`, 'defend');
+                        updateUI(currentHeroHp, currentMonsterHp, data);
+                        safeLog();
+                        await delay(700);
+                    }
                     else {
                         if (isHeroTurn == false && data.monsterAction === "Stunned") {
                             safeLog();
@@ -1586,6 +1861,12 @@
                         if (isActionUlt) {
                             const vfx = isHeroTurn ? monsterVfxEngine : heroVfxEngine;
                             if (vfx) await safePlay(vfx, 'play', false);
+                        }
+
+                        // Visual de esquiva: monstro atacou mas herói desviou
+                        if (!isHeroTurn && isDodge && damageTaken === 0) {
+                            spawnFloatingText('heroWrapper', '💨 DESVIOU!', 'defend');
+                            await delay(500);
                         }
 
                         if (damageTaken > 0) {
@@ -1688,6 +1969,11 @@
                 if (data.heroShieldDurability !== undefined) heroShieldDur = data.heroShieldDurability;
                 if (data.heroShieldCooldown !== undefined) heroShieldCd = data.heroShieldCooldown;
                 if (data.heroPotions !== undefined) potionsLeft = data.heroPotions;
+                if (data.heroDodgesLeft !== undefined) dodgesLeft = data.heroDodgesLeft;
+                if (data.heroBloodPactUsed !== undefined) bloodPactUsed = data.heroBloodPactUsed;
+                if (data.monsterShieldDurability !== undefined) monsterShieldDur = data.monsterShieldDurability;
+                if (data.monsterShieldCooldown !== undefined) monsterShieldCd = data.monsterShieldCooldown;
+                if (data.monsterDodgesLeft !== undefined) monsterDodgesLeft = data.monsterDodgesLeft;
 
                 isHeroAuraActive = data.heroInSecondWind === true;
                 isMonsterAuraActive = data.monsterInSecondWind === true;
@@ -1727,7 +2013,12 @@
 
                         setTimeout(() => {
                             document.getElementById('monsterSelect').value = dungeonQueue[dungeonIndex];
-                            startGame();
+                            const nextIsBoss = dungeonQueue[dungeonIndex] === 'MinotaurBoss';
+                            if (nextIsBoss) {
+                                showBossModal(() => startGame());
+                            } else {
+                                startGame();
+                            }
                         }, 2500);
                     } else {
                         const msg = isVictory ? "🏆 VITÓRIA!" : "☠️ VOCÊ MORREU!";
@@ -1741,6 +2032,11 @@
                         gameBanner.style.zIndex = '1000'; gameBanner.style.pointerEvents = 'none';
                         gameBanner.innerText = msg;
                         document.getElementById('arenaBackground').appendChild(gameBanner);
+
+                        // Show RETRY / EXIT buttons after any final outcome
+                        setTimeout(() => {
+                            document.getElementById('gameOverPanel').style.display = 'flex';
+                        }, 1200);
 
                         updateButtons();
                     }
@@ -1786,9 +2082,44 @@
                 } else {
                     eventDisplay.innerHTML = '';
                 }
+                // Update status strip event chip
+                const evtChip = document.getElementById('sChipEvent');
+                if (evtChip) {
+                    const evtMap = { ToxicGas:'☠️ Gás Tóxico', MagneticStorm:'⚡ Tempestade', ManaBlessing:'✨ Bênção de Mana', BloodFrenzy:'🩸 Frenesi', HealingWinds:'🍃 Ventos Curativos', ManaVoid:'🌌 Vazio de Mana', Supplies:'🎁 Suprimentos', DivineAegis:'🛡️ Égide Divina', Normal:'🌍 Arena Normal' };
+                    evtChip.textContent = evtMap[data.currentArenaEvent] || '🌍 Arena Normal';
+                    evtChip.className = (data.currentArenaEvent && data.currentArenaEvent !== 'Normal') ? 's-chip on' : 's-chip';
+                }
             }
         }
     </script>
+
+    <!-- MODAL AVISO DO BOSS -->
+    <div id="bossModal">
+        <div class="boss-modal-panel">
+            <h2>⚠️ BOSS APROXIMANDO-SE</h2>
+            <p class="boss-subtitle">O Minotauro Chefe pode manifestar-se de quatro formas diferentes.</p>
+            <div class="boss-variants">
+                <div class="boss-variant-card">
+                    <div class="variant-name">🐂 Minotauro Chefe</div>
+                    <div class="variant-desc">A forma base. Entra na batalha com 1 carga de Ultimate já carregada e começa a avaliar-te desde o primeiro turno.</div>
+                </div>
+                <div class="boss-variant-card">
+                    <div class="variant-name">⚔️ Minotauro Tático</div>
+                    <div class="variant-desc">Mais resistente e feroz. Especialista em punir jogadores que atacam sem parar — quanto mais agressivo fores, mais ele contra-ataca.</div>
+                </div>
+                <div class="boss-variant-card">
+                    <div class="variant-name">💥 Minotauro Quebra-Guarda</div>
+                    <div class="variant-desc">O mais perigoso em termos de dano puro. Especializado em estilhaçar defesas — usar escudo contra ele é uma aposta arriscada.</div>
+                </div>
+                <div class="boss-variant-card">
+                    <div class="variant-name">⚖️ Minotauro Implacável</div>
+                    <div class="variant-desc">Versão equilibrada e versátil. Mais resistente e forte que o base, adaptável a qualquer estilo de luta.</div>
+                </div>
+            </div>
+            <p class="boss-modal-note">🎲 A variante que enfrentarás é escolhida aleatoriamente. Adapta a tua estratégia!</p>
+            <button id="btnBossConfirm">Enfrentar o Boss ⚔️</button>
+        </div>
+    </div>
 </body>
 
 </html>

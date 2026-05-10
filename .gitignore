@@ -6,6 +6,8 @@
 .vs/
 .vscode/
 
+arena-rpg-f0305-firebase-adminsdk-fbsvc-b8d7f30e09.json
+
 # Logs locais de treino da IA (Para não sujar o repositório)
 LogsDeTreino/
 *.jsongit init

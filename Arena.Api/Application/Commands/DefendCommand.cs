@@ -8,9 +8,8 @@ namespace Arena.Api.Application.Commands
         public void Execute(GameSession session, bool isHero, IAttackStrategy? attackStrategy = null)
         {
             var characterName = isHero ? session.Player.Name : session.Enemy.Name;
-            
-            // CORREÇÃO: Agora exige que a Durabilidade seja > 0 rigorosamente!
-            bool canDefend = isHero 
+
+            bool canDefend = isHero
                 ? (session.HeroShieldCooldown == 0 && session.HeroShieldDurability > 0 && session.CurrentArenaEvent != "MagneticStorm")
                 : (session.MonsterShieldCooldown == 0 && session.MonsterShieldDurability > 0 && session.CurrentArenaEvent != "MagneticStorm");
 
@@ -22,12 +21,23 @@ namespace Arena.Api.Application.Commands
             }
             else
             {
-                if (isHero) session.HeroDefendedThisTurn = true; else session.IsMonsterDefending = true;
+                if (isHero)
+                {
+                    session.HeroDefendedThisTurn = true;
+                    session.HeroShieldDurability--;
+                    if (session.HeroShieldDurability <= 0) { session.HeroShieldDurability = 0; session.HeroShieldCooldown = 3; }
+                }
+                else
+                {
+                    session.IsMonsterDefending = true;
+                    session.MonsterShieldDurability--;
+                    if (session.MonsterShieldDurability <= 0) { session.MonsterShieldDurability = 0; session.MonsterShieldCooldown = 3; }
+                }
 
                 if (stolePotion)
                     session.CombatLog.Add($"🛡️ {characterName} avançou numa postura agressiva para interceptar o inimigo!");
                 else
-                    session.CombatLog.Add($"{characterName} assumiu uma postura defensiva impenetrável!");
+                    session.CombatLog.Add($"🛡️ {characterName} assumiu uma postura defensiva! (Escudo: {(isHero ? session.HeroShieldDurability : session.MonsterShieldDurability)}/3 restantes)");
             }
         }
     }
