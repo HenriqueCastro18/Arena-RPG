@@ -287,6 +287,67 @@ Abre `Arena.Web/` no VS Code e clica em **Go Live**. O `config.js` já aponta pa
 
 ---
 
+## ☁️ Deploy em Produção
+
+### Stack
+| Camada | Plataforma | Motivo |
+|---|---|---|
+| Frontend | **Vercel** | Static hosting gratuito |
+| API | **Fly.io** | Free tier com VM sempre ativa (sem cold start — crítico para sessões em memória) |
+| Logs de IA | **Firebase Firestore** | Persistência dos dados de treino |
+
+---
+
+### API — Fly.io
+
+#### Pré-requisitos
+```bash
+# Windows (PowerShell)
+winget install flyctl
+# ou
+powershell -c "iwr https://fly.io/install.ps1 -useb | iex"
+```
+
+#### Deploy
+
+```bash
+fly auth login
+
+cd Arena.Api
+
+# Cria o app no Fly.io (pede nome único — altere "arena-rpg-api" se necessário)
+fly launch --copy-config --no-deploy
+
+# Variáveis de ambiente (Firebase)
+fly secrets set FIREBASE_PROJECT_ID="seu-project-id"
+fly secrets set FIREBASE_CREDENTIALS='COLE_AQUI_O_CONTEUDO_COMPLETO_DO_JSON'
+
+# Deploy
+fly deploy
+```
+
+A URL da API aparece no final do output (`https://arena-rpg-api.fly.dev`).
+
+> **Onde ficam as variáveis:** Fly.io → Dashboard do app → **Secrets** (ou via `fly secrets list`)
+
+#### Após o deploy
+Abre `Arena.Web/config.js` e substitui a URL:
+```js
+window.CONFIG = Object.freeze({
+    API_URL: "https://arena-rpg-api.fly.dev/api/game"
+});
+```
+
+---
+
+### Frontend — Vercel
+
+1. Vercel Dashboard → **New Project** → importa `Arena-RPG`
+2. **Root Directory** → `ArenaProject`
+3. Deploy — o `vercel.json` configura tudo automaticamente
+
+---
+
 ## 👨‍💻 Desenvolvedor
 
 **Henrique Castro**  
